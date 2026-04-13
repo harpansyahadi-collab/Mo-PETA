@@ -2,96 +2,88 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Lacak Pesanan | Mo-PETA</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/lacak.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- NAVIGASI -->
-  <nav class="navbar">
-    <div class="nav-brand">🗺️ Mo-PETA</div>
-    <ul class="nav-links">
-      <li><a href="index.html">Beranda</a></li>
-      <li><a href="pesan.html">Pesan</a></li>
-      <li><a href="lacak.html" class="active">Lacak Pesanan</a></li>
-    </ul>
-    <button class="nav-toggle" id="navToggle">&#9776;</button>
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <div class="topnav-inner">
+      <div class="topnav-brand"><span>🗺️</span> Mo-PETA</div>
+      <ul class="topnav-links">
+        <li><a href="index.html">Beranda</a></li>
+        <li><a href="pesan.html">Pesan</a></li>
+        <li><a href="lacak.html" class="active">Lacak Pesanan</a></li>
+      </ul>
+    </div>
   </nav>
 
-  <!-- HEADER HALAMAN -->
-  <div class="page-header">
-    <div class="container">
-      <h1>Lacak Pesanan</h1>
-      <p>Masukkan ID pesanan atau NIM untuk melihat status pembuatan peta Anda</p>
-    </div>
+  <!-- PAGE HERO -->
+  <div class="page-hero">
+    <h1>🔍 Lacak Pesanan</h1>
+    <p>Masukkan ID pesanan atau NIM untuk cek status pembuatan peta</p>
   </div>
 
   <section class="lacak-section">
     <div class="container">
 
-      <!-- LACAK BERDASARKAN ID PESANAN -->
+      <!-- LACAK BY ID -->
       <div class="lacak-card">
-        <h2>🔍 Lacak dengan ID Pesanan</h2>
-        <p>Masukkan ID pesanan yang Anda terima saat memesan (format: PETA-XXXXX).</p>
+        <h2>Lacak dengan ID Pesanan</h2>
+        <p>Format: <strong>PETA-XXXXX</strong> — diberikan saat memesan.</p>
 
-        <div class="search-box">
-          <input
-            type="text"
-            id="inputIdPesanan"
-            placeholder="Contoh: PETA-12345"
-            onkeypress="if(event.key==='Enter') lacakById()"
-          />
-          <button onclick="lacakById()" class="btn-search">Lacak</button>
+        <div class="search-row">
+          <input id="inputId" type="text" placeholder="Contoh: PETA-AB1C2"
+                 onkeypress="if(event.key==='Enter')lacakById()" />
+          <button class="btn btn-primary btn-sm" onclick="lacakById()">Cari</button>
         </div>
 
-        <!-- Hasil Lacak ID -->
-        <div id="hasilLacakId" style="display:none;">
-          <div class="hasil-card" id="hasilCardId">
-          </div>
+        <div id="loadId" class="state-loading" style="display:none;">⏳ Mencari...</div>
+        <div id="errId"  class="state-error"   style="display:none;"></div>
+        <div id="hasilId" style="display:none;">
+          <div class="hasil-card" id="hasilIdCard"></div>
         </div>
-        <div id="errorLacakId" class="error-msg" style="display:none;"></div>
-        <div id="loadingLacakId" class="loading-msg" style="display:none;">⏳ Mencari pesanan...</div>
       </div>
 
-      <div class="divider-or">
-        <span>atau</span>
-      </div>
+      <div class="or-divider"><span>atau</span></div>
 
-      <!-- RIWAYAT PESANAN BERDASARKAN NIM -->
+      <!-- RIWAYAT BY NIM -->
       <div class="lacak-card">
-        <h2>📋 Riwayat Pesanan Berdasarkan NIM</h2>
-        <p>Masukkan NIM Anda untuk melihat semua pesanan yang pernah dibuat.</p>
+        <h2>Riwayat Pesanan by NIM</h2>
+        <p>Lihat semua pesanan yang pernah dibuat dengan NIM Anda.</p>
 
-        <div class="search-box">
-          <input
-            type="text"
-            id="inputNIM"
-            placeholder="Masukkan NIM Anda"
-            onkeypress="if(event.key==='Enter') lacakByNIM()"
-          />
-          <button onclick="lacakByNIM()" class="btn-search">Cari</button>
+        <div class="search-row">
+          <input id="inputNIM" type="text" placeholder="Masukkan NIM Anda"
+                 onkeypress="if(event.key==='Enter')lacakByNIM()" />
+          <button class="btn btn-primary btn-sm" onclick="lacakByNIM()">Cari</button>
         </div>
 
-        <!-- Hasil Riwayat NIM -->
-        <div id="hasilRiwayat" style="display:none;">
-          <h3 class="riwayat-title">Riwayat Pesanan</h3>
-          <div id="listRiwayat" class="riwayat-list"></div>
+        <div id="loadNIM"   class="state-loading" style="display:none;">⏳ Mencari...</div>
+        <div id="errNIM"    class="state-error"   style="display:none;"></div>
+        <div id="hasilNIM"  style="display:none;">
+          <div class="riwayat-title" id="riwayatTitle"></div>
+          <div class="riwayat-list" id="riwayatList"></div>
         </div>
-        <div id="errorRiwayat" class="error-msg" style="display:none;"></div>
-        <div id="loadingRiwayat" class="loading-msg" style="display:none;">⏳ Mencari riwayat pesanan...</div>
       </div>
 
     </div>
   </section>
 
-  <!-- MODAL DETAIL PESANAN -->
-  <div id="modalDetail" class="modal-overlay" style="display:none;" onclick="tutupModal(event)">
-    <div class="modal-box">
-      <button class="modal-close" onclick="tutupModal(null, true)">✕</button>
+  <!-- MODAL DETAIL -->
+  <div class="modal-bg" id="modalBg" onclick="tutupModal(event)">
+    <div class="modal" id="modal">
+      <button class="modal-close" onclick="tutupModal(null,true)">✕</button>
       <h2>Detail Pesanan</h2>
-      <div id="modalContent"></div>
+      <div class="modal-info" id="modalInfo"></div>
+      <div class="modal-id-row">
+        <span class="modal-id-val" id="modalIdVal"></span>
+        <button class="btn-copy" onclick="salinIdModal()">📋 Salin ID</button>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-gray btn-sm btn-full" onclick="tutupModal(null,true)">Tutup</button>
+      </div>
     </div>
   </div>
 
@@ -99,23 +91,35 @@
   <footer class="footer">
     <div class="container">
       <div class="footer-brand">🗺️ Mo-PETA</div>
-      <p class="footer-tagline">Jasa Pembuatan Peta Penelitian Profesional</p>
+      <div class="footer-tag">Jasa Pembuatan Peta Penelitian Profesional</div>
       <div class="footer-contacts">
-        <a href="https://wa.me/6281234567890" target="_blank" class="footer-contact">
-          <span class="contact-icon">📱</span>
-          <span>WhatsApp: <strong>+62 812-3456-7890</strong></span>
+        <a class="footer-link" href="https://wa.me/6281234567890" target="_blank">
+          📱 <span>WhatsApp: <strong>+62 812-3456-7890</strong></span>
         </a>
-        <a href="https://instagram.com/mopeta.id" target="_blank" class="footer-contact">
-          <span class="contact-icon">📸</span>
-          <span>Instagram: <strong>@mopeta.id</strong></span>
+        <a class="footer-link" href="https://instagram.com/mopeta.id" target="_blank">
+          📸 <span>Instagram: <strong>@mopeta.id</strong></span>
         </a>
       </div>
-      <p class="footer-copy">&copy; 2025 Mo-PETA. Hak Cipta Dilindungi.</p>
+      <div class="footer-copy">&copy; 2025 Mo-PETA.</div>
     </div>
   </footer>
 
-  <script src="js/config.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/lacak.js"></script>
+  <!-- BOTTOM NAV -->
+  <nav class="bottomnav">
+    <div class="bottomnav-inner">
+      <a class="bottomnav-item" href="index.html">
+        <span class="nav-icon">🏠</span>Beranda
+      </a>
+      <a class="bottomnav-item" href="pesan.html">
+        <span class="nav-icon">📝</span>Pesan
+      </a>
+      <a class="bottomnav-item active" href="lacak.html">
+        <span class="nav-icon">🔍</span>Lacak
+      </a>
+    </div>
+  </nav>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
