@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mo-PETA | Jasa Pembuatan Peta Penelitian</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/beranda.css" />
+</head>
+<body>
+
+  <!-- NAVIGASI -->
+  <nav class="navbar">
+    <div class="nav-brand">🗺️ Mo-PETA</div>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Beranda</a></li>
+      <li><a href="pesan.html">Pesan</a></li>
+      <li><a href="lacak.html">Lacak Pesanan</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle">&#9776;</button>
+  </nav>
+
+  <!-- HERO / ABOUT -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Mo-PETA</h1>
+      <p class="hero-subtitle">Jasa Pembuatan Peta Penelitian Profesional</p>
+      <p class="hero-desc">
+        Kami hadir untuk membantu peneliti, mahasiswa, dan akademisi dalam menyajikan
+        data spasial secara visual dan informatif. Dari peta lokasi penelitian hingga
+        peta titik pengambilan sampel — kami kerjakan dengan teliti dan tepat.
+      </p>
+      <a href="pesan.html" class="btn-pesan">Pesan Sekarang</a>
+    </div>
+    <div class="hero-img">
+      <div class="hero-img-placeholder">🗺️</div>
+    </div>
+  </section>
+
+  <!-- TENTANG KAMI -->
+  <section class="about">
+    <div class="container">
+      <h2>Tentang Kami</h2>
+      <div class="about-grid">
+        <div class="about-card">
+          <div class="about-icon">🎯</div>
+          <h3>Akurat & Presisi</h3>
+          <p>Setiap peta dibuat dengan data yang valid dan representasi visual yang tepat sesuai kebutuhan penelitian Anda.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">⚡</div>
+          <h3>Cepat & Responsif</h3>
+          <p>Proses pengerjaan yang efisien dengan komunikasi aktif agar hasil sesuai ekspektasi dan tepat waktu.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">📋</div>
+          <h3>Mudah Dipesan</h3>
+          <p>Form pemesanan yang sederhana dan sistem pelacakan pesanan yang transparan untuk kenyamanan Anda.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALERI CONTOH PETA -->
+  <section class="galeri">
+    <div class="container">
+      <h2>Contoh Peta</h2>
+      <p class="galeri-desc">Berikut adalah beberapa contoh peta yang telah kami buat. Geser ke samping untuk melihat lebih banyak.</p>
+
+      <div class="galeri-wrapper">
+        <button class="galeri-nav galeri-prev" onclick="scrollGaleri(-1)">&#8249;</button>
+        <div class="galeri-scroll" id="galeriScroll">
+
+          <!-- Contoh peta 1 -->
+          <div class="galeri-item">
+            <div class="galeri-img-box">
+              <img src="img/peta1.jpg" alt="Peta Lokasi Penelitian Kecamatan" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🗺️</div>'" />
+            </div>
+            <p class="galeri-label">Peta Lokasi Penelitian Kecamatan</p>
+          </div>
+
+          <!-- Contoh peta 2 -->
+          <div class="galeri-item">
+            <div class="galeri-img-box">
+              <img src="img/peta2.jpg" alt="Peta Titik Sampel Sungai" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🗺️</div>'" />
+            </div>
+            <p class="galeri-label">Peta Titik Sampel Sungai</p>
+          </div>
+
+          <!-- Contoh peta 3 -->
+          <div class="galeri-item">
+            <div class="galeri-img-box">
+              <img src="img/peta3.jpg" alt="Peta Administrasi Wilayah" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🗺️</div>'" />
+            </div>
+            <p class="galeri-label">Peta Administrasi Wilayah</p>
+          </div>
+
+          <!-- Contoh peta 4 -->
+          <div class="galeri-item">
+            <div class="galeri-img-box">
+              <img src="img/peta4.jpg" alt="Peta Lokasi Institusi Penelitian" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🗺️</div>'" />
+            </div>
+            <p class="galeri-label">Peta Lokasi Institusi Penelitian</p>
+          </div>
+
+          <!-- Contoh peta 5 -->
+          <div class="galeri-item">
+            <div class="galeri-img-box">
+              <img src="img/peta5.jpg" alt="Peta Titik Pengambilan Sampel Tanah" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🗺️</div>'" />
+            </div>
+            <p class="galeri-label">Peta Titik Pengambilan Sampel Tanah</p>
+          </div>
+
+          <!-- Contoh peta 6 -->
+          <div class="galeri-item">
+            <div class="galeri-img-box">
+              <img src="img/peta6.jpg" alt="Peta Kawasan Hutan Penelitian" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🗺️</div>'" />
+            </div>
+            <p class="galeri-label">Peta Kawasan Hutan Penelitian</p>
+          </div>
+
+        </div>
+        <button class="galeri-nav galeri-next" onclick="scrollGaleri(1)">&#8250;</button>
+      </div>
+
+      <div class="galeri-dots" id="galeriDots"></div>
+    </div>
+  </section>
+
+  <!-- CALL TO ACTION -->
+  <section class="cta">
+    <div class="container">
+      <h2>Siap Memesan Peta Penelitian Anda?</h2>
+      <p>Isi form pemesanan sekarang dan kami akan segera memproses permintaan Anda.</p>
+      <a href="pesan.html" class="btn-pesan">Pesan Sekarang</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-brand">🗺️ Mo-PETA</div>
+      <p class="footer-tagline">Jasa Pembuatan Peta Penelitian Profesional</p>
+      <div class="footer-contacts">
+        <a href="https://wa.me/6281234567890" target="_blank" class="footer-contact">
+          <span class="contact-icon">📱</span>
+          <span>WhatsApp: <strong>+62 812-3456-7890</strong></span>
+        </a>
+        <a href="https://instagram.com/mopeta.id" target="_blank" class="footer-contact">
+          <span class="contact-icon">📸</span>
+          <span>Instagram: <strong>@mopeta.id</strong></span>
+        </a>
+      </div>
+      <p class="footer-copy">&copy; 2025 Mo-PETA. Hak Cipta Dilindungi.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/beranda.js"></script>
+</body>
+</html>

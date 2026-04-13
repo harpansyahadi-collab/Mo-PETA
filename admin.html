@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel | Mo-PETA</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body class="admin-body">
+
+  <!-- LAYAR LOGIN (tampil jika kode salah / tidak ada) -->
+  <div id="screenLogin" class="screen-login">
+    <div class="login-box">
+      <div class="login-logo">🗺️</div>
+      <h1>Mo-PETA Admin</h1>
+      <p>Masukkan kode akses untuk membuka panel admin</p>
+      <div class="login-form">
+        <input
+          type="password"
+          id="inputKodeLogin"
+          placeholder="Kode akses admin"
+          onkeypress="if(event.key==='Enter') loginAdmin()"
+          autocomplete="off"
+        />
+        <button onclick="loginAdmin()" class="btn-login">Masuk</button>
+      </div>
+      <div id="errorLogin" class="login-error" style="display:none;">Kode akses salah. Coba lagi.</div>
+      <a href="index.html" class="btn-back-home">← Kembali ke Beranda</a>
+    </div>
+  </div>
+
+  <!-- PANEL ADMIN (tampil setelah login berhasil) -->
+  <div id="screenAdmin" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">🗺️ Mo-PETA</div>
+        <div class="sidebar-subtitle">Admin Panel</div>
+        <button class="sidebar-close" onclick="tutupSidebar()">✕</button>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="sidebar-link active" onclick="gantiTab('dashboard', this)">
+          <span class="sidebar-icon">📊</span> Dashboard
+        </a>
+        <a href="#" class="sidebar-link" onclick="gantiTab('pesanan', this)">
+          <span class="sidebar-icon">📋</span> Daftar Pesanan
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button onclick="logout()" class="btn-logout">🚪 Keluar</button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="admin-main" id="adminMain">
+
+      <!-- TOP BAR -->
+      <header class="admin-topbar">
+        <button class="topbar-menu" onclick="bukaSidebar()">☰</button>
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <button class="topbar-refresh" onclick="refreshData()" title="Refresh data">🔄</button>
+      </header>
+
+      <!-- TAB: DASHBOARD -->
+      <div id="tabDashboard" class="admin-tab">
+        <div class="tab-content">
+          <h2 class="section-title">Ringkasan Pesanan</h2>
+
+          <!-- Stats -->
+          <div class="stats-grid" id="statsGrid">
+            <div class="stat-card stat-total">
+              <div class="stat-angka" id="statTotal">—</div>
+              <div class="stat-label">Total Pesanan</div>
+            </div>
+            <div class="stat-card stat-menunggu">
+              <div class="stat-angka" id="statMenunggu">—</div>
+              <div class="stat-label">Menunggu Konfirmasi</div>
+            </div>
+            <div class="stat-card stat-proses">
+              <div class="stat-angka" id="statProses">—</div>
+              <div class="stat-label">Sedang Diproses</div>
+            </div>
+            <div class="stat-card stat-selesai">
+              <div class="stat-angka" id="statSelesai">—</div>
+              <div class="stat-label">Selesai</div>
+            </div>
+          </div>
+
+          <!-- Pesanan Terbaru -->
+          <h2 class="section-title" style="margin-top:32px;">Pesanan Terbaru</h2>
+          <div id="tabelTerbaru" class="tabel-wrapper">
+            <div class="loading-admin">⏳ Memuat data...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: DAFTAR PESANAN -->
+      <div id="tabPesanan" class="admin-tab" style="display:none;">
+        <div class="tab-content">
+          <div class="pesanan-toolbar">
+            <h2 class="section-title" style="margin:0;">Daftar Pesanan</h2>
+            <div class="toolbar-actions">
+              <input
+                type="text"
+                id="inputCari"
+                placeholder="🔍 Cari nama, NIM, atau ID..."
+                oninput="filterPesanan()"
+                class="input-cari"
+              />
+              <select id="filterStatus" onchange="filterPesanan()" class="select-filter">
+                <option value="">Semua Status</option>
+                <option value="Menunggu Konfirmasi">Menunggu Konfirmasi</option>
+                <option value="Dikonfirmasi">Dikonfirmasi</option>
+                <option value="Sedang Diproses">Sedang Diproses</option>
+                <option value="Revisi">Revisi</option>
+                <option value="Selesai">Selesai</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="tabelPesanan" class="tabel-wrapper">
+            <div class="loading-admin">⏳ Memuat data...</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL UPDATE STATUS -->
+  <div id="modalUpdate" class="modal-overlay" style="display:none;" onclick="tutupModalUpdate(event)">
+    <div class="modal-box">
+      <button class="modal-close" onclick="tutupModalUpdate(null, true)">✕</button>
+      <h2>Update Status Pesanan</h2>
+
+      <div class="modal-info-row" id="modalUpdateInfo"></div>
+
+      <div class="form-group" style="margin-bottom:20px;">
+        <label for="selectStatusBaru">Status Baru</label>
+        <select id="selectStatusBaru" class="select-status-baru">
+          <option value="Menunggu Konfirmasi">Menunggu Konfirmasi</option>
+          <option value="Dikonfirmasi">Dikonfirmasi</option>
+          <option value="Sedang Diproses">Sedang Diproses</option>
+          <option value="Revisi">Revisi</option>
+          <option value="Selesai">Selesai</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom:24px;">
+        <label for="catatanAdmin">Catatan Admin (opsional)</label>
+        <textarea id="catatanAdmin" rows="3" placeholder="Tambahkan catatan untuk pemesan (opsional)"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button id="btnSimpanStatus" onclick="simpanStatusBaru()" class="btn-simpan">
+          <span id="btnSimpanText">Simpan Perubahan</span>
+          <span id="btnSimpanLoading" style="display:none;">⏳ Menyimpan...</span>
+        </button>
+        <button onclick="tutupModalUpdate(null, true)" class="btn-batal">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

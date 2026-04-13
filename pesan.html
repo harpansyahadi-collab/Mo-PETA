@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pesan Peta | Mo-PETA</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/pesan.css" />
+</head>
+<body>
+
+  <!-- NAVIGASI -->
+  <nav class="navbar">
+    <div class="nav-brand">🗺️ Mo-PETA</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Beranda</a></li>
+      <li><a href="pesan.html" class="active">Pesan</a></li>
+      <li><a href="lacak.html">Lacak Pesanan</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle">&#9776;</button>
+  </nav>
+
+  <!-- HEADER HALAMAN -->
+  <div class="page-header">
+    <div class="container">
+      <h1>Form Pemesanan Peta</h1>
+      <p>Isi form di bawah ini untuk memesan peta penelitian Anda</p>
+    </div>
+  </div>
+
+  <!-- FORM PEMESANAN -->
+  <section class="form-section">
+    <div class="container">
+      <div class="form-card">
+
+        <!-- Loading & Error State -->
+        <div id="loadingConfig" class="info-banner info-yellow" style="display:none;">
+          ⚠️ <strong>Perhatian:</strong> URL Spreadsheet belum dikonfigurasi. Silakan buka file <code>js/config.js</code> dan isi dengan URL Spreadsheet Anda.
+        </div>
+
+        <form id="formPesan" novalidate>
+
+          <!-- Bahasa -->
+          <div class="form-group">
+            <label for="bahasa">Bahasa Peta <span class="required">*</span></label>
+            <select id="bahasa" name="bahasa" required>
+              <option value="">-- Pilih Bahasa --</option>
+              <option value="Indonesia">Indonesia</option>
+              <option value="Inggris">Inggris</option>
+            </select>
+          </div>
+
+          <!-- Nama -->
+          <div class="form-group">
+            <label for="nama">Nama Lengkap <span class="required">*</span></label>
+            <input type="text" id="nama" name="nama" placeholder="Masukkan nama lengkap Anda" required />
+          </div>
+
+          <!-- NIM -->
+          <div class="form-group">
+            <label for="nim">NIM <span class="required">*</span></label>
+            <input type="text" id="nim" name="nim" placeholder="Masukkan NIM Anda" required />
+          </div>
+
+          <!-- Program Studi -->
+          <div class="form-group">
+            <label for="prodi">Program Studi / Jurusan <span class="required">*</span></label>
+            <input type="text" id="prodi" name="prodi" placeholder="Contoh: Teknik Lingkungan, Biologi, dll." required />
+          </div>
+
+          <!-- Jenis Peta -->
+          <div class="form-group">
+            <label for="jenisPeta">Jenis Peta <span class="required">*</span></label>
+            <select id="jenisPeta" name="jenisPeta" required onchange="handleJenisPeta()">
+              <option value="">-- Pilih Jenis Peta --</option>
+              <option value="Peta Lokasi Penelitian">Peta Lokasi Penelitian</option>
+              <option value="Peta Titik Pengambilan Sampel">Peta Titik Pengambilan Sampel</option>
+            </select>
+          </div>
+
+          <!-- SECTION: Peta Lokasi Penelitian -->
+          <div id="sectionLokasi" class="dynamic-section" style="display:none;">
+            <div class="section-divider">
+              <span>Detail Peta Lokasi Penelitian</span>
+            </div>
+
+            <div class="form-group">
+              <label for="jenisLokasi">Jenis Lokasi <span class="required">*</span></label>
+              <select id="jenisLokasi" name="jenisLokasi" onchange="handleJenisLokasi()">
+                <option value="">-- Pilih Jenis Lokasi --</option>
+                <option value="Wilayah">Wilayah (Kecamatan / Kabupaten / Provinsi)</option>
+                <option value="Nama Tempat">Nama Tempat (Institusi / Lembaga)</option>
+              </select>
+            </div>
+
+            <!-- Sub: Wilayah -->
+            <div id="subWilayah" class="sub-section" style="display:none;">
+              <div class="form-group">
+                <label for="namaWilayah">Nama Wilayah <span class="required">*</span></label>
+                <input type="text" id="namaWilayah" name="namaWilayah" placeholder="Contoh: Kecamatan Waru, Kabupaten Sidoarjo" />
+              </div>
+              <div class="form-group">
+                <label for="keteranganWilayah">Keterangan Tambahan</label>
+                <textarea id="keteranganWilayah" name="keteranganWilayah" rows="3" placeholder="Jelaskan detail tambahan tentang lokasi penelitian Anda (opsional)"></textarea>
+              </div>
+            </div>
+
+            <!-- Sub: Nama Tempat -->
+            <div id="subTempat" class="sub-section" style="display:none;">
+              <div class="form-group">
+                <label for="namaTempat">Nama Institusi / Lembaga <span class="required">*</span></label>
+                <input type="text" id="namaTempat" name="namaTempat" placeholder="Contoh: Universitas Airlangga, BRIN, RSUD Dr. Soetomo" />
+              </div>
+              <div class="form-group">
+                <label for="alamatTempat">Alamat Lengkap <span class="required">*</span></label>
+                <textarea id="alamatTempat" name="alamatTempat" rows="3" placeholder="Masukkan alamat lengkap institusi / lembaga"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="keteranganTempat">Keterangan Tambahan</label>
+                <textarea id="keteranganTempat" name="keteranganTempat" rows="3" placeholder="Jelaskan detail tambahan yang perlu ditampilkan di peta (opsional)"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION: Peta Titik Pengambilan Sampel (redirect ke WA) -->
+          <div id="sectionSampel" class="dynamic-section" style="display:none;">
+            <div class="section-divider">
+              <span>Peta Titik Pengambilan Sampel</span>
+            </div>
+            <div class="wa-redirect-box">
+              <div class="wa-icon">💬</div>
+              <h3>Pesan Melalui WhatsApp</h3>
+              <p>
+                Untuk pemesanan <strong>Peta Titik Pengambilan Sampel</strong>, 
+                silakan hubungi kami langsung melalui WhatsApp agar kami dapat 
+                mendiskusikan detail koordinat dan kebutuhan spesifik Anda secara lebih mendalam.
+              </p>
+              <a id="btnWA" href="#" target="_blank" class="btn-wa" onclick="bukaWhatsApp()">
+                💬 Chat WhatsApp Sekarang
+              </a>
+              <p class="wa-note">Anda akan diarahkan ke WhatsApp dengan pesan otomatis yang sudah terisi.</p>
+            </div>
+          </div>
+
+          <!-- Catatan Tambahan (untuk Lokasi Penelitian) -->
+          <div id="catatanGroup" class="form-group" style="display:none;">
+            <label for="catatan">Catatan Tambahan</label>
+            <textarea id="catatan" name="catatan" rows="4" placeholder="Tuliskan catatan atau permintaan khusus lainnya (opsional)"></textarea>
+          </div>
+
+          <!-- Tombol Submit (hanya untuk Peta Lokasi) -->
+          <div id="btnSubmitGroup" style="display:none;">
+            <button type="submit" class="btn-submit" id="btnSubmit">
+              <span id="btnText">Kirim Pesanan</span>
+              <span id="btnLoading" style="display:none;">⏳ Mengirim...</span>
+            </button>
+          </div>
+
+        </form>
+
+        <!-- SUCCESS STATE -->
+        <div id="successBox" class="success-box" style="display:none;">
+          <div class="success-icon">✅</div>
+          <h2>Pesanan Berhasil Dikirim!</h2>
+          <p>ID Pesanan Anda:</p>
+          <div class="id-pesanan-box">
+            <span id="idPesananDisplay"></span>
+            <button class="btn-copy" onclick="salinId()">📋 Salin ID</button>
+          </div>
+          <p class="success-note">Simpan ID pesanan ini untuk melacak status pembuatan peta Anda.</p>
+          <div class="success-actions">
+            <a href="lacak.html" class="btn-lacak">Lacak Pesanan</a>
+            <a href="index.html" class="btn-outline">Kembali ke Beranda</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-brand">🗺️ Mo-PETA</div>
+      <p class="footer-tagline">Jasa Pembuatan Peta Penelitian Profesional</p>
+      <div class="footer-contacts">
+        <a href="https://wa.me/6281234567890" target="_blank" class="footer-contact">
+          <span class="contact-icon">📱</span>
+          <span>WhatsApp: <strong>+62 812-3456-7890</strong></span>
+        </a>
+        <a href="https://instagram.com/mopeta.id" target="_blank" class="footer-contact">
+          <span class="contact-icon">📸</span>
+          <span>Instagram: <strong>@mopeta.id</strong></span>
+        </a>
+      </div>
+      <p class="footer-copy">&copy; 2025 Mo-PETA. Hak Cipta Dilindungi.</p>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/pesan.js"></script>
+</body>
+</html>

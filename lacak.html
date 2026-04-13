@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lacak Pesanan | Mo-PETA</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/lacak.css" />
+</head>
+<body>
+
+  <!-- NAVIGASI -->
+  <nav class="navbar">
+    <div class="nav-brand">🗺️ Mo-PETA</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Beranda</a></li>
+      <li><a href="pesan.html">Pesan</a></li>
+      <li><a href="lacak.html" class="active">Lacak Pesanan</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle">&#9776;</button>
+  </nav>
+
+  <!-- HEADER HALAMAN -->
+  <div class="page-header">
+    <div class="container">
+      <h1>Lacak Pesanan</h1>
+      <p>Masukkan ID pesanan atau NIM untuk melihat status pembuatan peta Anda</p>
+    </div>
+  </div>
+
+  <section class="lacak-section">
+    <div class="container">
+
+      <!-- LACAK BERDASARKAN ID PESANAN -->
+      <div class="lacak-card">
+        <h2>🔍 Lacak dengan ID Pesanan</h2>
+        <p>Masukkan ID pesanan yang Anda terima saat memesan (format: PETA-XXXXX).</p>
+
+        <div class="search-box">
+          <input
+            type="text"
+            id="inputIdPesanan"
+            placeholder="Contoh: PETA-12345"
+            onkeypress="if(event.key==='Enter') lacakById()"
+          />
+          <button onclick="lacakById()" class="btn-search">Lacak</button>
+        </div>
+
+        <!-- Hasil Lacak ID -->
+        <div id="hasilLacakId" style="display:none;">
+          <div class="hasil-card" id="hasilCardId">
+          </div>
+        </div>
+        <div id="errorLacakId" class="error-msg" style="display:none;"></div>
+        <div id="loadingLacakId" class="loading-msg" style="display:none;">⏳ Mencari pesanan...</div>
+      </div>
+
+      <div class="divider-or">
+        <span>atau</span>
+      </div>
+
+      <!-- RIWAYAT PESANAN BERDASARKAN NIM -->
+      <div class="lacak-card">
+        <h2>📋 Riwayat Pesanan Berdasarkan NIM</h2>
+        <p>Masukkan NIM Anda untuk melihat semua pesanan yang pernah dibuat.</p>
+
+        <div class="search-box">
+          <input
+            type="text"
+            id="inputNIM"
+            placeholder="Masukkan NIM Anda"
+            onkeypress="if(event.key==='Enter') lacakByNIM()"
+          />
+          <button onclick="lacakByNIM()" class="btn-search">Cari</button>
+        </div>
+
+        <!-- Hasil Riwayat NIM -->
+        <div id="hasilRiwayat" style="display:none;">
+          <h3 class="riwayat-title">Riwayat Pesanan</h3>
+          <div id="listRiwayat" class="riwayat-list"></div>
+        </div>
+        <div id="errorRiwayat" class="error-msg" style="display:none;"></div>
+        <div id="loadingRiwayat" class="loading-msg" style="display:none;">⏳ Mencari riwayat pesanan...</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MODAL DETAIL PESANAN -->
+  <div id="modalDetail" class="modal-overlay" style="display:none;" onclick="tutupModal(event)">
+    <div class="modal-box">
+      <button class="modal-close" onclick="tutupModal(null, true)">✕</button>
+      <h2>Detail Pesanan</h2>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-brand">🗺️ Mo-PETA</div>
+      <p class="footer-tagline">Jasa Pembuatan Peta Penelitian Profesional</p>
+      <div class="footer-contacts">
+        <a href="https://wa.me/6281234567890" target="_blank" class="footer-contact">
+          <span class="contact-icon">📱</span>
+          <span>WhatsApp: <strong>+62 812-3456-7890</strong></span>
+        </a>
+        <a href="https://instagram.com/mopeta.id" target="_blank" class="footer-contact">
+          <span class="contact-icon">📸</span>
+          <span>Instagram: <strong>@mopeta.id</strong></span>
+        </a>
+      </div>
+      <p class="footer-copy">&copy; 2025 Mo-PETA. Hak Cipta Dilindungi.</p>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/lacak.js"></script>
+</body>
+</html>
