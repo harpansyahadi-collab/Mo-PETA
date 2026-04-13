@@ -1,185 +1,169 @@
-/**
- * ============================================================
- *  Mo-PETA — ADMIN JS
- * ============================================================
- *
- *  Akses admin melalui: admin.html?kode=KODE_ADMIN_ANDA
- *  atau masukkan kode di form login yang muncul.
- *
- * ============================================================
- */
+/* =====================================================
+   Mo-PETA — admin.js
+   Panel Admin
+   ===================================================== */
 
-var semuaPesanan = [];
-var idEditSedang = null;
+var semuaData = [];
+var editId    = null;
 
-// ==========================================
-// INISIALISASI
-// ==========================================
+/* =====================================================
+   UTILITIES (sama seperti script.js)
+   ===================================================== */
 
-document.addEventListener('DOMContentLoaded', function () {
-  // Buat overlay sidebar untuk mobile
-  var overlay = document.createElement('div');
-  overlay.className = 'sidebar-overlay';
-  overlay.id = 'sidebarOverlay';
-  overlay.addEventListener('click', tutupSidebar);
-  document.body.appendChild(overlay);
+function esc(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 
-  // Cek apakah ada kode di URL
-  var params = new URLSearchParams(window.location.search);
-  var kodeUrl = params.get('kode');
+function fmtTgl(s) {
+  if (!s) return '—';
+  var d = new Date(s);
+  return isNaN(d) ? String(s) : d.toLocaleDateString('id-ID', {
+    day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'
+  });
+}
 
+function badgeClass(status) {
+  return {
+    'Menunggu Konfirmasi':'badge-wait',
+    'Dikonfirmasi':'badge-confirm',
+    'Sedang Diproses':'badge-process',
+    'Revisi':'badge-revise',
+    'Selesai':'badge-done'
+  }[status] || 'badge-wait';
+}
+
+function escAttr(s) { return "'" + String(s).replace(/'/g,"\\'") + "'"; }
+
+function apiGet(params, cb) {
+  var qs = Object.keys(params).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);}).join('&');
+  fetch(CONFIG.SPREADSHEET_API_URL + '?' + qs)
+    .then(function(r){ return r.json(); })
+    .then(function(d){ cb({ ok:true, data:d }); })
+    .catch(function(){ cb({ ok:false, err:'Gagal menghubungi server.' }); });
+}
+
+function apiPost(body, cb) {
+  fetch(CONFIG.SPREADSHEET_API_URL, { method:'POST', body: JSON.stringify(body) })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ cb({ ok:true, data:d }); })
+    .catch(function(){ cb({ ok:false, err:'Gagal menghubungi server.' }); });
+}
+
+function showToast(msg, type) {
+  var el = document.getElementById('_toast');
+  if (!el) { el = document.createElement('div'); el.id = '_toast'; document.body.appendChild(el); }
+  el.className = 'toast toast-' + (type||'success');
+  el.textContent = msg; el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.style.display='none'; }, 3000);
+}
+
+/* =====================================================
+   INIT
+   ===================================================== */
+
+document.addEventListener('DOMContentLoaded', function() {
+  /* Overlay sidebar */
+  var ov = document.getElementById('sidebarOverlay');
+  if (ov) ov.addEventListener('click', tutupSidebar);
+
+  /* Cek kode di URL */
+  var kodeUrl = new URLSearchParams(location.search).get('kode');
   if (kodeUrl) {
-    if (verifikasiKode(kodeUrl)) {
-      tampilPanelAdmin();
-    } else {
-      tampilScreenLogin();
-      tampilErrorLogin();
-    }
-  } else {
-    tampilScreenLogin();
+    if (kodeUrl === CONFIG.ADMIN_CODE) bukaAdmin();
+    else tampilErrLogin();
   }
 });
 
-// ==========================================
-// AUTENTIKASI
-// ==========================================
+/* =====================================================
+   LOGIN
+   ===================================================== */
 
-function verifikasiKode(kode) {
-  if (typeof CONFIG === 'undefined') return false;
-  return kode === CONFIG.ADMIN_CODE;
-}
-
-function loginAdmin() {
-  var input = document.getElementById('inputKodeLogin').value;
-  var errorEl = document.getElementById('errorLogin');
-
-  errorEl.style.display = 'none';
-
-  if (verifikasiKode(input)) {
-    tampilPanelAdmin();
+function doLogin() {
+  var kode = document.getElementById('inputKode').value;
+  if (kode === CONFIG.ADMIN_CODE) {
+    document.getElementById('loginErr').style.display = 'none';
+    bukaAdmin();
   } else {
-    errorEl.style.display = 'block';
-    document.getElementById('inputKodeLogin').value = '';
-    document.getElementById('inputKodeLogin').focus();
+    tampilErrLogin();
+    document.getElementById('inputKode').value = '';
+    document.getElementById('inputKode').focus();
   }
 }
 
-function logout() {
-  if (!confirm('Yakin ingin keluar dari panel admin?')) return;
-  document.getElementById('screenAdmin').style.display = 'none';
-  document.getElementById('screenLogin').style.display = 'flex';
-  document.getElementById('inputKodeLogin').value = '';
-  document.getElementById('errorLogin').style.display = 'none';
-  // Hapus kode dari URL tanpa reload halaman
-  window.history.replaceState({}, document.title, window.location.pathname);
+function tampilErrLogin() {
+  document.getElementById('loginErr').style.display = 'block';
 }
 
-function tampilScreenLogin() {
-  document.getElementById('screenLogin').style.display = 'flex';
-  document.getElementById('screenAdmin').style.display = 'none';
+function bukaAdmin() {
+  document.getElementById('loginScreen').style.display  = 'none';
+  document.getElementById('adminScreen').style.display  = 'block';
+  muatData();
 }
 
-function tampilErrorLogin() {
-  var errorEl = document.getElementById('errorLogin');
-  errorEl.style.display = 'block';
+function doLogout() {
+  if (!confirm('Yakin ingin keluar?')) return;
+  document.getElementById('adminScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('inputKode').value = '';
+  history.replaceState({}, '', location.pathname);
 }
 
-function tampilPanelAdmin() {
-  document.getElementById('screenLogin').style.display = 'none';
-  document.getElementById('screenAdmin').style.display = 'flex';
-  muatSemuaPesanan();
-}
+/* =====================================================
+   PANEL NAVIGATION
+   ===================================================== */
 
-// ==========================================
-// NAVIGASI TAB
-// ==========================================
+function gotoPanel(id, btn) {
+  document.querySelectorAll('.admin-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.sidebar-link').forEach(function(b){ b.classList.remove('active'); });
 
-function gantiTab(nama, elLink) {
-  // Sembunyikan semua tab
-  document.querySelectorAll('.admin-tab').forEach(function (el) {
-    el.style.display = 'none';
-  });
+  var panel = document.getElementById('panel' + id.charAt(0).toUpperCase() + id.slice(1));
+  if (panel) panel.classList.add('active');
+  if (btn)   btn.classList.add('active');
 
-  // Hapus active dari semua link
-  document.querySelectorAll('.sidebar-link').forEach(function (el) {
-    el.classList.remove('active');
-  });
+  var titles = { dashboard:'Dashboard', pesanan:'Daftar Pesanan' };
+  document.getElementById('topbarTitle').textContent = titles[id] || id;
 
-  // Tampilkan tab yang dipilih
-  var tabEl = document.getElementById('tab' + capitalizeFirst(nama));
-  if (tabEl) tabEl.style.display = 'block';
-
-  // Set active link
-  if (elLink) elLink.classList.add('active');
-
-  // Update title topbar
-  var titles = {
-    dashboard: 'Dashboard',
-    pesanan: 'Daftar Pesanan',
-  };
-  document.getElementById('topbarTitle').textContent = titles[nama] || nama;
-
-  // Tutup sidebar di mobile
   tutupSidebar();
-
-  return false;
 }
 
-function capitalizeFirst(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-// ==========================================
-// SIDEBAR MOBILE
-// ==========================================
+/* =====================================================
+   SIDEBAR MOBILE
+   ===================================================== */
 
 function bukaSidebar() {
-  document.getElementById('adminSidebar').classList.add('open');
-  document.getElementById('sidebarOverlay').classList.add('active');
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('open');
 }
 
 function tutupSidebar() {
-  document.getElementById('adminSidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('active');
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
 }
 
-// ==========================================
-// MUAT DATA PESANAN
-// ==========================================
+/* =====================================================
+   MUAT DATA
+   ===================================================== */
 
-function refreshData() {
-  var tabPesanan = document.getElementById('tabPesanan');
-  var tabDashboard = document.getElementById('tabDashboard');
-  var sedangPesanan = tabPesanan && tabPesanan.style.display !== 'none';
+function muatData() {
+  document.getElementById('tblTerbaru').innerHTML = '<div class="tbl-empty"><div class="ei">⏳</div>Memuat data...</div>';
+  document.getElementById('tblSemua').innerHTML   = '<div class="tbl-empty"><div class="ei">⏳</div>Memuat data...</div>';
 
-  document.getElementById('tabelTerbaru').innerHTML = '<div class="loading-admin">⏳ Memuat data...</div>';
-  document.getElementById('tabelPesanan').innerHTML = '<div class="loading-admin">⏳ Memuat data...</div>';
-
-  muatSemuaPesanan();
-}
-
-function muatSemuaPesanan() {
   if (!IS_CONFIG_READY) {
-    // Mode demo — tampilkan data dari localStorage
-    var lokal = [];
-    try {
-      lokal = JSON.parse(localStorage.getItem('mopeta_riwayat') || '[]');
-    } catch (e) {}
-
-    if (lokal.length === 0) {
-      lokal = contohDataDemo();
-    }
-
-    semuaPesanan = lokal;
+    semuaData = demoData();
     renderSemua();
     return;
   }
 
-  callApi({ action: 'semuaPesanan', adminCode: CONFIG.ADMIN_CODE }, function (result) {
-    if (result.ok && result.data && result.data.pesanan) {
-      semuaPesanan = result.data.pesanan;
+  apiGet({ action:'semuaPesanan', adminCode: CONFIG.ADMIN_CODE }, function(res) {
+    if (res.ok && res.data && res.data.pesanan) {
+      semuaData = res.data.pesanan;
     } else {
-      semuaPesanan = [];
+      semuaData = [];
+      showToast('Gagal memuat data: ' + (res.err || 'Error tidak diketahui'), 'error');
     }
     renderSemua();
   });
@@ -187,395 +171,195 @@ function muatSemuaPesanan() {
 
 function renderSemua() {
   renderStats();
-  renderTabelTerbaru();
-  renderTabelPesanan(semuaPesanan);
+  renderTblTerbaru();
+  renderTblSemua(semuaData);
 }
 
-// ==========================================
-// STATS
-// ==========================================
+/* =====================================================
+   STATS
+   ===================================================== */
 
 function renderStats() {
-  var total = semuaPesanan.length;
-  var menunggu = semuaPesanan.filter(function (p) { return p.status === 'Menunggu Konfirmasi'; }).length;
-  var proses = semuaPesanan.filter(function (p) {
-    return p.status === 'Dikonfirmasi' || p.status === 'Sedang Diproses' || p.status === 'Revisi';
+  var total    = semuaData.length;
+  var menunggu = semuaData.filter(function(x){ return x.status === 'Menunggu Konfirmasi'; }).length;
+  var proses   = semuaData.filter(function(x){
+    return x.status === 'Dikonfirmasi' || x.status === 'Sedang Diproses' || x.status === 'Revisi';
   }).length;
-  var selesai = semuaPesanan.filter(function (p) { return p.status === 'Selesai'; }).length;
+  var selesai  = semuaData.filter(function(x){ return x.status === 'Selesai'; }).length;
 
-  animasiAngka('statTotal', total);
-  animasiAngka('statMenunggu', menunggu);
-  animasiAngka('statProses', proses);
-  animasiAngka('statSelesai', selesai);
+  animNum('sTotal',    total);
+  animNum('sMenunggu', menunggu);
+  animNum('sProses',   proses);
+  animNum('sSelesai',  selesai);
 }
 
-function animasiAngka(elId, targetAngka) {
-  var el = document.getElementById(elId);
+function animNum(id, target) {
+  var el = document.getElementById(id);
   if (!el) return;
-  var mulai = 0;
-  var durasi = 600;
-  var interval = 16;
-  var langkah = Math.ceil(targetAngka / (durasi / interval));
-  var timer = setInterval(function () {
-    mulai += langkah;
-    if (mulai >= targetAngka) {
-      mulai = targetAngka;
-      clearInterval(timer);
-    }
-    el.textContent = mulai;
-  }, interval);
+  var cur = 0, step = Math.ceil(target / 20);
+  var t = setInterval(function(){
+    cur = Math.min(cur + step, target);
+    el.textContent = cur;
+    if (cur >= target) clearInterval(t);
+  }, 30);
 }
 
-// ==========================================
-// TABEL TERBARU (dashboard)
-// ==========================================
+/* =====================================================
+   TABEL
+   ===================================================== */
 
-function renderTabelTerbaru() {
-  var container = document.getElementById('tabelTerbaru');
-  if (!container) return;
+function renderTblTerbaru() {
+  renderTbl('tblTerbaru', semuaData.slice(0, 8));
+}
 
-  var terbaru = semuaPesanan.slice(0, 8);
+function renderTblSemua(data) {
+  renderTbl('tblSemua', data);
+}
 
-  if (terbaru.length === 0) {
-    container.innerHTML = renderEmptyState('Belum ada pesanan masuk.');
+function renderTbl(wrapperId, data) {
+  var wrap = document.getElementById(wrapperId);
+  if (!wrap) return;
+
+  if (!data.length) {
+    wrap.innerHTML = '<div class="tbl-empty"><div class="ei">📭</div>Tidak ada data</div>';
     return;
   }
 
-  container.innerHTML = renderTabel(terbaru, false);
-}
-
-// ==========================================
-// TABEL SEMUA PESANAN (tab pesanan)
-// ==========================================
-
-function renderTabelPesanan(data) {
-  var container = document.getElementById('tabelPesanan');
-  if (!container) return;
-
-  if (data.length === 0) {
-    container.innerHTML = renderEmptyState('Tidak ada pesanan yang sesuai filter.');
-    return;
-  }
-
-  container.innerHTML = renderTabel(data, true);
-}
-
-function renderTabel(data, tampilkanSemua) {
-  var baris = data.map(function (p) {
-    var statusClass = getAdminStatusClass(p.status);
-    return (
-      '<tr>' +
-        '<td class="td-id">' + escHtml(p.idPesanan) + '</td>' +
-        '<td class="td-nama">' + escHtml(p.nama) + '</td>' +
-        '<td>' + escHtml(p.nim) + '</td>' +
-        '<td>' + escHtml(p.jenisPeta) + '</td>' +
-        '<td class="td-detail" title="' + escHtml(p.prodi) + '">' + escHtml(p.prodi) + '</td>' +
-        '<td class="td-waktu">' + formatTanggal(p.waktu) + '</td>' +
-        '<td><span class="status-badge ' + statusClass + '">' + escHtml(p.status || 'Menunggu Konfirmasi') + '</span></td>' +
-        '<td class="td-aksi">' +
-          '<button class="btn-update" onclick="bukaModalUpdate(' + escAttr(JSON.stringify(p)) + ')">✏️ Update</button>' +
-        '</td>' +
-      '</tr>'
-    );
+  var rows = data.map(function(d){
+    return '<tr>' +
+      '<td class="td-id">'+esc(d.idPesanan)+'</td>' +
+      '<td class="td-name">'+esc(d.nama)+'</td>' +
+      '<td>'+esc(d.nim)+'</td>' +
+      '<td class="td-clip" title="'+esc(d.prodi)+'">'+esc(d.prodi)+'</td>' +
+      '<td>'+esc(d.jenisPeta||'—')+'</td>' +
+      '<td class="td-time">'+fmtTgl(d.waktu)+'</td>' +
+      '<td><span class="badge '+badgeClass(d.status)+'">'+esc(d.status||'Menunggu')+'</span></td>' +
+      '<td class="td-act"><button class="btn btn-primary btn-sm" onclick="bukaUpdate('+escAttr(JSON.stringify(d))+')">✏️ Update</button></td>' +
+    '</tr>';
   }).join('');
 
-  return (
-    '<div class="tabel-scroll">' +
-    '<table class="admin-tabel">' +
-      '<thead><tr>' +
-        '<th>ID Pesanan</th>' +
-        '<th>Nama</th>' +
-        '<th>NIM</th>' +
-        '<th>Jenis Peta</th>' +
-        '<th>Program Studi</th>' +
-        '<th>Tanggal</th>' +
-        '<th>Status</th>' +
-        '<th>Aksi</th>' +
-      '</tr></thead>' +
-      '<tbody>' + baris + '</tbody>' +
-    '</table>' +
-    '</div>'
-  );
+  wrap.innerHTML =
+    '<div class="tbl-scroll">' +
+    '<table>' +
+    '<thead><tr>' +
+      '<th>ID Pesanan</th><th>Nama</th><th>NIM</th><th>Prodi</th>' +
+      '<th>Jenis Peta</th><th>Tanggal</th><th>Status</th><th>Aksi</th>' +
+    '</tr></thead>' +
+    '<tbody>'+rows+'</tbody>' +
+    '</table></div>';
 }
 
-function renderEmptyState(pesan) {
-  return (
-    '<div class="tabel-empty">' +
-      '<div class="empty-icon">📭</div>' +
-      '<div>' + escHtml(pesan) + '</div>' +
-    '</div>'
-  );
-}
+/* =====================================================
+   FILTER TABEL
+   ===================================================== */
 
-function getAdminStatusClass(status) {
-  var map = {
-    'Menunggu Konfirmasi': 'status-menunggu',
-    'Dikonfirmasi': 'status-konfirmasi',
-    'Sedang Diproses': 'status-proses',
-    'Revisi': 'status-revisi',
-    'Selesai': 'status-selesai',
-  };
-  return map[status] || 'status-menunggu';
-}
+function filterTabel() {
+  var cari   = (document.getElementById('inputCari').value   || '').toLowerCase();
+  var status = (document.getElementById('filterStatus').value || '');
 
-// ==========================================
-// FILTER PESANAN
-// ==========================================
-
-function filterPesanan() {
-  var cari = document.getElementById('inputCari').value.toLowerCase().trim();
-  var filterStatus = document.getElementById('filterStatus').value;
-
-  var filtered = semuaPesanan.filter(function (p) {
-    var cocokCari = !cari ||
-      (p.nama && p.nama.toLowerCase().includes(cari)) ||
-      (p.nim && p.nim.toLowerCase().includes(cari)) ||
-      (p.idPesanan && p.idPesanan.toLowerCase().includes(cari)) ||
-      (p.prodi && p.prodi.toLowerCase().includes(cari));
-
-    var cocokStatus = !filterStatus || p.status === filterStatus;
-
-    return cocokCari && cocokStatus;
+  var filtered = semuaData.filter(function(d){
+    var match = !cari ||
+      (d.nama     && d.nama.toLowerCase().includes(cari)) ||
+      (d.nim      && String(d.nim).toLowerCase().includes(cari)) ||
+      (d.idPesanan&& d.idPesanan.toLowerCase().includes(cari)) ||
+      (d.prodi    && d.prodi.toLowerCase().includes(cari));
+    var sMatch = !status || d.status === status;
+    return match && sMatch;
   });
 
-  renderTabelPesanan(filtered);
+  renderTblSemua(filtered);
 }
 
-// ==========================================
-// MODAL UPDATE STATUS
-// ==========================================
+/* =====================================================
+   MODAL UPDATE STATUS
+   ===================================================== */
 
-function bukaModalUpdate(dataStr) {
-  var d;
-  try {
-    d = typeof dataStr === 'string' ? JSON.parse(dataStr) : dataStr;
-  } catch (e) { return; }
+function bukaUpdate(raw) {
+  var d = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  editId = d.idPesanan;
 
-  idEditSedang = d.idPesanan;
+  document.getElementById('updateInfo').innerHTML =
+    '<div class="ii"><label>ID Pesanan</label><span>'+esc(d.idPesanan)+'</span></div>' +
+    '<div class="ii"><label>Nama</label><span>'+esc(d.nama)+'</span></div>' +
+    '<div class="ii"><label>NIM</label><span>'+esc(d.nim)+'</span></div>' +
+    '<div class="ii"><label>Jenis Peta</label><span>'+esc(d.jenisPeta)+'</span></div>';
 
-  var info = document.getElementById('modalUpdateInfo');
-  info.innerHTML =
-    '<div class="modal-info-item"><label>ID Pesanan</label><div class="val">' + escHtml(d.idPesanan) + '</div></div>' +
-    '<div class="modal-info-item"><label>Nama</label><div class="val">' + escHtml(d.nama) + '</div></div>' +
-    '<div class="modal-info-item"><label>NIM</label><div class="val">' + escHtml(d.nim) + '</div></div>' +
-    '<div class="modal-info-item"><label>Jenis Peta</label><div class="val">' + escHtml(d.jenisPeta) + '</div></div>';
-
-  // Set status saat ini sebagai default
-  var selectStatus = document.getElementById('selectStatusBaru');
-  selectStatus.value = d.status || 'Menunggu Konfirmasi';
-
-  // Kosongkan catatan admin
+  document.getElementById('selectStatus').value = d.status || 'Menunggu Konfirmasi';
   document.getElementById('catatanAdmin').value = '';
 
-  var modal = document.getElementById('modalUpdate');
-  modal.style.display = 'flex';
+  document.getElementById('modalUpdateBg').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
-function tutupModalUpdate(e, paksa) {
-  if (!paksa && e && e.target !== document.getElementById('modalUpdate')) return;
-  document.getElementById('modalUpdate').style.display = 'none';
+function tutupModalUpdate(e, force) {
+  if (!force && e && e.target !== document.getElementById('modalUpdateBg')) return;
+  document.getElementById('modalUpdateBg').classList.remove('open');
   document.body.style.overflow = '';
-  idEditSedang = null;
+  editId = null;
 }
 
-function simpanStatusBaru() {
-  if (!idEditSedang) return;
+function simpanStatus() {
+  if (!editId) return;
 
-  var statusBaru = document.getElementById('selectStatusBaru').value;
-  var catatanAdmin = document.getElementById('catatanAdmin').value.trim();
-  var btn = document.getElementById('btnSimpanStatus');
-  var btnText = document.getElementById('btnSimpanText');
-  var btnLoading = document.getElementById('btnSimpanLoading');
+  var statusBaru    = document.getElementById('selectStatus').value;
+  var catatanAdmin  = document.getElementById('catatanAdmin').value.trim();
+  var btn           = document.getElementById('btnSimpan');
+  var lbl           = document.getElementById('simpanLabel');
+  var ld            = document.getElementById('simpanLoad');
 
-  btn.disabled = true;
-  btnText.style.display = 'none';
-  btnLoading.style.display = 'inline';
+  btn.disabled = true; lbl.style.display = 'none'; ld.style.display = 'inline';
 
   var payload = {
-    action: 'updateStatus',
-    idPesanan: idEditSedang,
-    statusBaru: statusBaru,
-    catatanAdmin: catatanAdmin,
-    adminCode: CONFIG.ADMIN_CODE,
+    action:'updateStatus',
+    idPesanan:editId,
+    statusBaru,
+    catatanAdmin,
+    adminCode: CONFIG.ADMIN_CODE
   };
 
-  if (IS_CONFIG_READY) {
-    callApiPost(payload, function (result) {
-      btn.disabled = false;
-      btnText.style.display = 'inline';
-      btnLoading.style.display = 'none';
+  function selesai(sukses) {
+    btn.disabled = false; lbl.style.display = 'inline'; ld.style.display = 'none';
+    if (sukses) {
+      semuaData = semuaData.map(function(x){
+        return x.idPesanan === editId ? Object.assign({}, x, { status:statusBaru, catatanAdmin }) : x;
+      });
+      renderSemua();
+      filterTabel();
+      tutupModalUpdate(null, true);
+      showToast('✅ Status berhasil diperbarui!');
+    } else {
+      showToast('❌ Gagal menyimpan. Coba lagi.', 'error');
+    }
+  }
 
-      if (result.ok && result.data && result.data.success) {
-        updateStatusLokal(idEditSedang, statusBaru);
-        tutupModalUpdate(null, true);
-        tampilNotifikasi('✅ Status berhasil diperbarui!', 'sukses');
-      } else {
-        tampilNotifikasi('❌ Gagal: ' + (result.error || 'Coba lagi.'), 'error');
-      }
+  if (IS_CONFIG_READY) {
+    apiPost(payload, function(res){
+      selesai(res.ok && res.data && res.data.success);
     });
   } else {
-    // Mode demo — update lokal saja
-    setTimeout(function () {
-      btn.disabled = false;
-      btnText.style.display = 'inline';
-      btnLoading.style.display = 'none';
-
-      updateStatusLokal(idEditSedang, statusBaru);
-      tutupModalUpdate(null, true);
-      tampilNotifikasi('✅ Status diperbarui (mode demo — tidak tersimpan ke spreadsheet)', 'sukses');
-    }, 600);
+    setTimeout(function(){ selesai(true); }, 700);
   }
 }
 
-function updateStatusLokal(idPesanan, statusBaru) {
-  semuaPesanan = semuaPesanan.map(function (p) {
-    if (p.idPesanan === idPesanan) {
-      return Object.assign({}, p, { status: statusBaru });
-    }
-    return p;
-  });
-  renderSemua();
-  // Juga filter ulang jika tab pesanan sedang terbuka
-  filterPesanan();
-}
+/* =====================================================
+   DEMO DATA (saat spreadsheet belum dikonfigurasi)
+   ===================================================== */
 
-// ==========================================
-// NOTIFIKASI TOAST
-// ==========================================
-
-function tampilNotifikasi(pesan, tipe) {
-  var existing = document.getElementById('toastNotif');
-  if (existing) existing.remove();
-
-  var toast = document.createElement('div');
-  toast.id = 'toastNotif';
-  toast.style.cssText = [
-    'position: fixed',
-    'bottom: 24px',
-    'right: 24px',
-    'padding: 14px 20px',
-    'border-radius: 10px',
-    'font-size: 0.9rem',
-    'font-weight: 600',
-    'z-index: 99999',
-    'box-shadow: 0 8px 24px rgba(0,0,0,0.2)',
-    'animation: slideInRight 0.3s ease',
-    'max-width: 320px',
-    tipe === 'sukses'
-      ? 'background: #dcfce7; color: #166534; border: 2px solid #86efac;'
-      : 'background: #fee2e2; color: #991b1b; border: 2px solid #fca5a5;'
-  ].join(';');
-  toast.textContent = pesan;
-
-  // Tambahkan animasi ke style
-  var style = document.createElement('style');
-  style.textContent = '@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }';
-  document.head.appendChild(style);
-
-  document.body.appendChild(toast);
-
-  setTimeout(function () {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(100%)';
-    toast.style.transition = 'all 0.3s ease';
-    setTimeout(function () { if (toast.parentNode) toast.remove(); }, 300);
-  }, 3000);
-}
-
-// ==========================================
-// DATA DEMO (jika spreadsheet belum dikonfigurasi)
-// ==========================================
-
-function contohDataDemo() {
+function demoData() {
+  var now = Date.now();
   return [
-    {
-      idPesanan: 'PETA-DEMO1',
-      waktu: new Date(Date.now() - 3600000 * 2).toISOString(),
-      nama: 'Siti Rahma Dewi',
-      nim: '20211001',
-      prodi: 'Teknik Lingkungan',
-      bahasa: 'Indonesia',
-      jenisPeta: 'Peta Lokasi Penelitian',
-      jenisLokasi: 'Wilayah',
-      detailLokasi: 'Kecamatan Waru, Kabupaten Sidoarjo',
-      catatan: '',
-      status: 'Menunggu Konfirmasi'
-    },
-    {
-      idPesanan: 'PETA-DEMO2',
-      waktu: new Date(Date.now() - 3600000 * 10).toISOString(),
-      nama: 'Budi Santoso',
-      nim: '20211002',
-      prodi: 'Biologi',
-      bahasa: 'Inggris',
-      jenisPeta: 'Peta Lokasi Penelitian',
-      jenisLokasi: 'Nama Tempat',
-      detailLokasi: 'Universitas Airlangga | Jl. Airlangga No. 4-6, Surabaya',
-      catatan: 'Tolong sertakan legenda detail',
-      status: 'Sedang Diproses'
-    },
-    {
-      idPesanan: 'PETA-DEMO3',
-      waktu: new Date(Date.now() - 3600000 * 30).toISOString(),
-      nama: 'Ahmad Fauzi',
-      nim: '20201015',
-      prodi: 'Kehutanan',
-      bahasa: 'Indonesia',
-      jenisPeta: 'Peta Lokasi Penelitian',
-      jenisLokasi: 'Wilayah',
-      detailLokasi: 'Kawasan Hutan Lindung Pasuruan',
-      catatan: '',
-      status: 'Selesai'
-    },
-    {
-      idPesanan: 'PETA-DEMO4',
-      waktu: new Date(Date.now() - 3600000 * 5).toISOString(),
-      nama: 'Putri Andini',
-      nim: '20211034',
-      prodi: 'Ilmu Kelautan',
-      bahasa: 'Inggris',
-      jenisPeta: 'Peta Lokasi Penelitian',
-      jenisLokasi: 'Wilayah',
-      detailLokasi: 'Perairan Selat Madura',
-      catatan: 'Butuh secepatnya',
-      status: 'Dikonfirmasi'
-    },
-    {
-      idPesanan: 'PETA-DEMO5',
-      waktu: new Date(Date.now() - 3600000 * 48).toISOString(),
-      nama: 'Rizky Pratama',
-      nim: '20201098',
-      prodi: 'Geografi',
-      bahasa: 'Indonesia',
-      jenisPeta: 'Peta Lokasi Penelitian',
-      jenisLokasi: 'Wilayah',
-      detailLokasi: 'Kabupaten Malang',
-      catatan: '',
-      status: 'Revisi'
-    },
+    { idPesanan:'PETA-DEMO1', waktu:new Date(now-7200000).toISOString(), nama:'Siti Rahma', nim:'20211001', prodi:'Teknik Lingkungan', bahasa:'Indonesia', jenisPeta:'Peta Lokasi Penelitian', jenisLokasi:'Wilayah', detailLokasi:'Kec. Waru, Kab. Sidoarjo', catatan:'', status:'Menunggu Konfirmasi', catatanAdmin:'' },
+    { idPesanan:'PETA-DEMO2', waktu:new Date(now-36000000).toISOString(), nama:'Budi Santoso', nim:'20211002', prodi:'Biologi', bahasa:'Inggris', jenisPeta:'Peta Lokasi Penelitian', jenisLokasi:'Nama Tempat', detailLokasi:'Universitas Airlangga', catatan:'Sertakan legenda detail', status:'Sedang Diproses', catatanAdmin:'Sedang dikerjakan' },
+    { idPesanan:'PETA-DEMO3', waktu:new Date(now-108000000).toISOString(), nama:'Ahmad Fauzi', nim:'20201015', prodi:'Kehutanan', bahasa:'Indonesia', jenisPeta:'Peta Lokasi Penelitian', jenisLokasi:'Wilayah', detailLokasi:'Hutan Lindung Pasuruan', catatan:'', status:'Selesai', catatanAdmin:'Peta sudah dikirim via email' },
+    { idPesanan:'PETA-DEMO4', waktu:new Date(now-18000000).toISOString(), nama:'Putri Andini', nim:'20211034', prodi:'Ilmu Kelautan', bahasa:'Inggris', jenisPeta:'Peta Lokasi Penelitian', jenisLokasi:'Wilayah', detailLokasi:'Perairan Selat Madura', catatan:'Butuh secepatnya', status:'Dikonfirmasi', catatanAdmin:'' },
+    { idPesanan:'PETA-DEMO5', waktu:new Date(now-172800000).toISOString(), nama:'Rizky Pratama', nim:'20201098', prodi:'Geografi', bahasa:'Indonesia', jenisPeta:'Peta Lokasi Penelitian', jenisLokasi:'Wilayah', detailLokasi:'Kabupaten Malang', catatan:'', status:'Revisi', catatanAdmin:'Mohon koreksi batas wilayah' },
   ];
 }
 
-// ==========================================
-// UTILITY (escape untuk keamanan)
-// ==========================================
+/* =====================================================
+   KEYBOARD SHORTCUT
+   ===================================================== */
 
-function escHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function escAttr(str) {
-  return "'" + String(str).replace(/'/g, "\\'") + "'";
-}
-
-// Tutup modal dengan Escape
-document.addEventListener('keydown', function (e) {
+document.addEventListener('keydown', function(e){
   if (e.key === 'Escape') tutupModalUpdate(null, true);
 });
