@@ -83,10 +83,17 @@ function apiGet(params, cb) {
 
 function apiPost(body, cb) {
   if (!IS_CONFIG_READY) { cb({ ok:false, err:'Spreadsheet belum dikonfigurasi.' }); return; }
-  fetch(CONFIG.SPREADSHEET_API_URL, { method:'POST', body: JSON.stringify(body) })
-    .then(function(r){ return r.json(); })
-    .then(function(d){ cb({ ok:true, data:d }); })
-    .catch(function(){ cb({ ok:false, err:'Gagal menghubungi server.' }); });
+  fetch(CONFIG.SPREADSHEET_API_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify(body)
+  })
+  .then(function() {
+    cb({ ok:true, data:{ success:true } });
+  })
+  .catch(function() {
+    cb({ ok:false, err:'Gagal menghubungi server. Periksa koneksi internet Anda.' });
+  });
 }
 
 /* localStorage */
