@@ -349,11 +349,7 @@ function demoData() {
   var now = Date.now();
   return [
     { idPesanan:'PETA-DEMO1', waktu:new Date(now-7200000).toISOString(), nama:'Siti Rahma', nim:'20211001', prodi:'Teknik Lingkungan', bahasa:'Indonesia', jenisPeta:'Peta Lokasi Penelitian', jenisLokasi:'Wilayah', detailLokasi:'Kec. Waru, Kab. Sidoarjo', catatan:'', status:'Menunggu Konfirmasi', catatanAdmin:'' },
-    { idPesanan:'PETA-DEMO2', waktu:new Date(now-36000000).toISOString(), nama:'Budi Santoso', nim:'20211002', prodi:'Biologi', bahasa:'Inggris', jenisPeta:'Peta Lokasi Penelitian', jenisLokasi:'Nama Tempat', detailLokasi:'Universitas Airlangga', catatan:'Sertakan legenda detail', status:'Sedang Diproses', catatanAdmin:'Sedang dikerjakan' },
-    { idPesanan:'PETA-DEMO3', waktu:new Date(now-108000000).toISOString(), nama:'Ahmad Fauzi', nim:'20201015', prodi:'Kehutanan', bahasa:'Indonesia', jenisPeta:'Peta Lokasi Penelitian', jenisLokasi:'Wilayah', detailLokasi:'Hutan Lindung Pasuruan', catatan:'', status:'Selesai', catatanAdmin:'Peta sudah dikirim via email' },
-    { idPesanan:'PETA-DEMO4', waktu:new Date(now-18000000).toISOString(), nama:'Putri Andini', nim:'20211034', prodi:'Ilmu Kelautan', bahasa:'Inggris', jenisPeta:'Peta Lokasi Penelitian', jenisLokasi:'Wilayah', detailLokasi:'Perairan Selat Madura', catatan:'Butuh secepatnya', status:'Dikonfirmasi', catatanAdmin:'' },
-    { idPesanan:'PETA-DEMO5', waktu:new Date(now-172800000).toISOString(), nama:'Rizky Pratama', nim:'20201098', prodi:'Geografi', bahasa:'Indonesia', jenisPeta:'Peta Lokasi Penelitian', jenisLokasi:'Wilayah', detailLokasi:'Kabupaten Malang', catatan:'', status:'Revisi', catatanAdmin:'Mohon koreksi batas wilayah' },
-  ];
+   ];
 }
 
 /* =====================================================
