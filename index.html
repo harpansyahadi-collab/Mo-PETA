@@ -2,137 +2,127 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Mo-PETA | Jasa Pembuatan Peta Penelitian</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/beranda.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- NAVIGASI -->
-  <nav class="navbar">
-    <div class="nav-brand">🗺️ Mo-PETA</div>
-    <ul class="nav-links">
-      <li><a href="index.html" class="active">Beranda</a></li>
-      <li><a href="pesan.html">Pesan</a></li>
-      <li><a href="lacak.html">Lacak Pesanan</a></li>
-    </ul>
-    <button class="nav-toggle" id="navToggle">&#9776;</button>
+  <!-- TOP NAV (desktop) -->
+  <nav class="topnav">
+    <div class="topnav-inner">
+      <div class="topnav-brand"><span>🗺️</span> Mo-PETA</div>
+      <ul class="topnav-links">
+        <li><a href="index.html" class="active">Beranda</a></li>
+        <li><a href="pesan.html">Pesan</a></li>
+        <li><a href="lacak.html">Lacak Pesanan</a></li>
+      </ul>
+    </div>
   </nav>
 
-  <!-- HERO / ABOUT -->
+  <!-- HERO -->
   <section class="hero">
-    <div class="hero-content">
-      <h1>Mo-PETA</h1>
-      <p class="hero-subtitle">Jasa Pembuatan Peta Penelitian Profesional</p>
-      <p class="hero-desc">
-        Kami hadir untuk membantu peneliti, mahasiswa, dan akademisi dalam menyajikan
-        data spasial secara visual dan informatif. Dari peta lokasi penelitian hingga
-        peta titik pengambilan sampel — kami kerjakan dengan teliti dan tepat.
-      </p>
-      <a href="pesan.html" class="btn-pesan">Pesan Sekarang</a>
-    </div>
-    <div class="hero-img">
-      <div class="hero-img-placeholder">🗺️</div>
-    </div>
+    <div class="hero-icon">🗺️</div>
+    <h1>Mo-PETA</h1>
+    <p class="hero-sub">Jasa Pembuatan Peta Penelitian Profesional</p>
+    <p class="hero-desc">
+      Kami membantu peneliti dan mahasiswa dalam menyajikan data spasial secara
+      visual dan informatif — dari peta lokasi penelitian hingga peta titik
+      pengambilan sampel.
+    </p>
+    <a href="pesan.html" class="btn btn-amber">Pesan Sekarang</a>
   </section>
 
-  <!-- TENTANG KAMI -->
-  <section class="about">
+  <!-- ABOUT -->
+  <section class="section" style="background:#fff;">
     <div class="container">
-      <h2>Tentang Kami</h2>
-      <div class="about-grid">
-        <div class="about-card">
-          <div class="about-icon">🎯</div>
-          <h3>Akurat & Presisi</h3>
-          <p>Setiap peta dibuat dengan data yang valid dan representasi visual yang tepat sesuai kebutuhan penelitian Anda.</p>
+      <h2 class="section-title">Mengapa Mo-PETA?</h2>
+      <div class="cards-row">
+        <div class="card">
+          <div class="card-icon">🎯</div>
+          <h3>Akurat &amp; Presisi</h3>
+          <p>Peta dibuat dengan data yang valid dan representasi visual yang tepat.</p>
         </div>
-        <div class="about-card">
-          <div class="about-icon">⚡</div>
-          <h3>Cepat & Responsif</h3>
-          <p>Proses pengerjaan yang efisien dengan komunikasi aktif agar hasil sesuai ekspektasi dan tepat waktu.</p>
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <h3>Cepat &amp; Responsif</h3>
+          <p>Pengerjaan efisien dengan komunikasi aktif agar hasil sesuai ekspektasi.</p>
         </div>
-        <div class="about-card">
-          <div class="about-icon">📋</div>
+        <div class="card">
+          <div class="card-icon">📋</div>
           <h3>Mudah Dipesan</h3>
-          <p>Form pemesanan yang sederhana dan sistem pelacakan pesanan yang transparan untuk kenyamanan Anda.</p>
+          <p>Form pemesanan simpel dengan sistem pelacakan progress transparan.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- GALERI CONTOH PETA -->
-  <section class="galeri">
+  <!-- GALERI -->
+  <section class="section">
     <div class="container">
-      <h2>Contoh Peta</h2>
-      <p class="galeri-desc">Berikut adalah beberapa contoh peta yang telah kami buat. Geser ke samping untuk melihat lebih banyak.</p>
+      <h2 class="section-title">Contoh Peta</h2>
+      <p style="text-align:center;font-size:.85rem;color:var(--text-mid);margin-bottom:16px;">
+        Geser untuk melihat contoh peta yang pernah kami buat
+      </p>
 
-      <div class="galeri-wrapper">
-        <button class="galeri-nav galeri-prev" onclick="scrollGaleri(-1)">&#8249;</button>
+      <div class="galeri-wrap">
+        <button class="galeri-btn" onclick="geserGaleri(-1)">&#8249;</button>
         <div class="galeri-scroll" id="galeriScroll">
-
-          <!-- Contoh peta 1 -->
           <div class="galeri-item">
-            <div class="galeri-img-box">
-              <img src="img/peta1.jpg" alt="Peta Lokasi Penelitian Kecamatan" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🗺️</div>'" />
+            <div class="galeri-img">
+              <img src="img/peta1.jpg" alt="Peta Lokasi Kecamatan"
+                   onerror="this.parentElement.innerHTML='<div class=galeri-img-ph>🗺️</div>'" />
             </div>
-            <p class="galeri-label">Peta Lokasi Penelitian Kecamatan</p>
+            <p class="galeri-caption">Peta Lokasi Kecamatan</p>
           </div>
-
-          <!-- Contoh peta 2 -->
           <div class="galeri-item">
-            <div class="galeri-img-box">
-              <img src="img/peta2.jpg" alt="Peta Titik Sampel Sungai" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🗺️</div>'" />
+            <div class="galeri-img">
+              <img src="img/peta2.jpg" alt="Peta Titik Sampel Sungai"
+                   onerror="this.parentElement.innerHTML='<div class=galeri-img-ph>🗺️</div>'" />
             </div>
-            <p class="galeri-label">Peta Titik Sampel Sungai</p>
+            <p class="galeri-caption">Peta Titik Sampel Sungai</p>
           </div>
-
-          <!-- Contoh peta 3 -->
           <div class="galeri-item">
-            <div class="galeri-img-box">
-              <img src="img/peta3.jpg" alt="Peta Administrasi Wilayah" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🗺️</div>'" />
+            <div class="galeri-img">
+              <img src="img/peta3.jpg" alt="Peta Administrasi Wilayah"
+                   onerror="this.parentElement.innerHTML='<div class=galeri-img-ph>🗺️</div>'" />
             </div>
-            <p class="galeri-label">Peta Administrasi Wilayah</p>
+            <p class="galeri-caption">Peta Administrasi Wilayah</p>
           </div>
-
-          <!-- Contoh peta 4 -->
           <div class="galeri-item">
-            <div class="galeri-img-box">
-              <img src="img/peta4.jpg" alt="Peta Lokasi Institusi Penelitian" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🗺️</div>'" />
+            <div class="galeri-img">
+              <img src="img/peta4.jpg" alt="Peta Lokasi Institusi"
+                   onerror="this.parentElement.innerHTML='<div class=galeri-img-ph>🗺️</div>'" />
             </div>
-            <p class="galeri-label">Peta Lokasi Institusi Penelitian</p>
+            <p class="galeri-caption">Peta Lokasi Institusi</p>
           </div>
-
-          <!-- Contoh peta 5 -->
           <div class="galeri-item">
-            <div class="galeri-img-box">
-              <img src="img/peta5.jpg" alt="Peta Titik Pengambilan Sampel Tanah" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🗺️</div>'" />
+            <div class="galeri-img">
+              <img src="img/peta5.jpg" alt="Peta Sampel Tanah"
+                   onerror="this.parentElement.innerHTML='<div class=galeri-img-ph>🗺️</div>'" />
             </div>
-            <p class="galeri-label">Peta Titik Pengambilan Sampel Tanah</p>
+            <p class="galeri-caption">Peta Sampel Tanah</p>
           </div>
-
-          <!-- Contoh peta 6 -->
           <div class="galeri-item">
-            <div class="galeri-img-box">
-              <img src="img/peta6.jpg" alt="Peta Kawasan Hutan Penelitian" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🗺️</div>'" />
+            <div class="galeri-img">
+              <img src="img/peta6.jpg" alt="Peta Kawasan Hutan"
+                   onerror="this.parentElement.innerHTML='<div class=galeri-img-ph>🗺️</div>'" />
             </div>
-            <p class="galeri-label">Peta Kawasan Hutan Penelitian</p>
+            <p class="galeri-caption">Peta Kawasan Hutan</p>
           </div>
-
         </div>
-        <button class="galeri-nav galeri-next" onclick="scrollGaleri(1)">&#8250;</button>
+        <button class="galeri-btn" onclick="geserGaleri(1)">&#8250;</button>
       </div>
-
       <div class="galeri-dots" id="galeriDots"></div>
     </div>
   </section>
 
-  <!-- CALL TO ACTION -->
-  <section class="cta">
+  <!-- CTA -->
+  <section class="cta-section">
     <div class="container">
-      <h2>Siap Memesan Peta Penelitian Anda?</h2>
-      <p>Isi form pemesanan sekarang dan kami akan segera memproses permintaan Anda.</p>
-      <a href="pesan.html" class="btn-pesan">Pesan Sekarang</a>
+      <h2>Siap Memesan Peta Penelitian?</h2>
+      <p>Isi form pemesanan dan kami akan segera memproses permintaan Anda.</p>
+      <a href="pesan.html" class="btn btn-amber">Pesan Sekarang</a>
     </div>
   </section>
 
@@ -140,22 +130,35 @@
   <footer class="footer">
     <div class="container">
       <div class="footer-brand">🗺️ Mo-PETA</div>
-      <p class="footer-tagline">Jasa Pembuatan Peta Penelitian Profesional</p>
+      <div class="footer-tag">Jasa Pembuatan Peta Penelitian Profesional</div>
       <div class="footer-contacts">
-        <a href="https://wa.me/6281234567890" target="_blank" class="footer-contact">
-          <span class="contact-icon">📱</span>
-          <span>WhatsApp: <strong>+62 812-3456-7890</strong></span>
+        <a class="footer-link" href="https://wa.me/6281234567890" target="_blank">
+          📱 <span>WhatsApp: <strong>+62 812-3456-7890</strong></span>
         </a>
-        <a href="https://instagram.com/mopeta.id" target="_blank" class="footer-contact">
-          <span class="contact-icon">📸</span>
-          <span>Instagram: <strong>@mopeta.id</strong></span>
+        <a class="footer-link" href="https://instagram.com/mopeta.id" target="_blank">
+          📸 <span>Instagram: <strong>@mopeta.id</strong></span>
         </a>
       </div>
-      <p class="footer-copy">&copy; 2025 Mo-PETA. Hak Cipta Dilindungi.</p>
+      <div class="footer-copy">&copy; 2025 Mo-PETA. Hak Cipta Dilindungi.</div>
     </div>
   </footer>
 
-  <script src="js/main.js"></script>
-  <script src="js/beranda.js"></script>
+  <!-- BOTTOM NAV (mobile) -->
+  <nav class="bottomnav">
+    <div class="bottomnav-inner">
+      <a class="bottomnav-item active" href="index.html">
+        <span class="nav-icon">🏠</span>Beranda
+      </a>
+      <a class="bottomnav-item" href="pesan.html">
+        <span class="nav-icon">📝</span>Pesan
+      </a>
+      <a class="bottomnav-item" href="lacak.html">
+        <span class="nav-icon">🔍</span>Lacak
+      </a>
+    </div>
+  </nav>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
