@@ -1,42 +1,32 @@
 /**
  * ============================================================
- *  Mo-PETA — KONFIGURASI SPREADSHEET & ADMIN
- * ============================================================
+ *  Mo-PETA — config.js
  *
- *  CARA PENGGUNAAN:
- *  1. Buka Google Apps Script (script.google.com)
- *  2. Buat project baru, paste kode dari file: appscript/Code.gs
- *  3. Deploy sebagai Web App (Execute as: Me, Who has access: Anyone)
- *  4. Salin URL deployment-nya
- *  5. Paste URL tersebut di bawah ini sebagai nilai SPREADSHEET_API_URL
+ *  CARA SETUP:
+ *  1. Jalankan setupSheet() di Google Apps Script (appscript/Code.gs)
+ *  2. Deploy sebagai Web App (Execute as: Me, Who has access: Anyone)
+ *  3. Salin URL Web App dan isi ke SPREADSHEET_API_URL di bawah
  *
- *  AKSES ADMIN:
- *  Buka: admin.html?kode=KODE_ANDA
- *  atau masukkan kode saat form login muncul.
- *
+ *  AKSES ADMIN: admin.html?kode=KODE_ANDA
  * ============================================================
  */
 
 const CONFIG = {
-  // Ganti dengan URL Web App dari Google Apps Script Anda
-  SPREADSHEET_API_URL: "MASUKKAN_URL_APPS_SCRIPT_ANDA_DI_SINI",
+  /* URL Web App dari Google Apps Script — wajib diisi */
+  SPREADSHEET_API_URL: "https://script.google.com/macros/s/AKfycbyPLx94vcE3JkfoVPlAWtgXRC3zO0UnWXag_tuPpEjqlFsn2MxvXJEe-GWlFGBDpS5K/exec",
 
-  // Nomor WhatsApp untuk redirect (format: 628xxxxxxxx tanpa + atau -)
-  WHATSAPP_NUMBER: "6281234567890",
+  /* Nomor WhatsApp (format: 628xxx, tanpa + atau spasi) */
+  WHATSAPP_NUMBER: "6281275540985",
 
-  // Nomor WhatsApp yang ditampilkan di footer
-  WHATSAPP_DISPLAY: "+62 812-3456-7890",
+  /* Tampilan nomor WA di footer */
+  WHATSAPP_DISPLAY: "+62 812-7554-0985",
 
-  // Username Instagram
+  /* Username Instagram */
   INSTAGRAM: "@mopeta.id",
 
-  // ============================================================
-  // KODE AKSES ADMIN
-  // Ganti dengan kode rahasia pilihan Anda (minimal 8 karakter)
-  // Akses admin: admin.html?kode=KODE_ANDA
-  // ============================================================
-  ADMIN_CODE: "mopeta-admin-2025",
+  /* Kode akses admin — samakan dengan ADMIN_CODE di Code.gs */
+  ADMIN_CODE: "0delapan5dua",
 };
 
-// Jangan ubah bagian di bawah ini
-const IS_CONFIG_READY = CONFIG.SPREADSHEET_API_URL !== "MASUKKAN_URL_APPS_SCRIPT_ANDA_DI_SINI";
+/* Jangan ubah baris ini */
+const IS_CONFIG_READY = CONFIG.SPREADSHEET_API_URL !== "https://script.google.com/macros/s/AKfycbyPLx94vcE3JkfoVPlAWtgXRC3zO0UnWXag_tuPpEjqlFsn2MxvXJEe-GWlFGBDpS5K/exec";
