@@ -96,7 +96,9 @@ function initFormPesan() {
     }
   });
 
-  jenisLokasiSelect.addEventListener("change", updateDetailLabel);
+  if (jenisLokasiSelect) {
+    jenisLokasiSelect.addEventListener("change", updateDetailLabel);
+  }
 
   function updateDetailLabel() {
     var jl = jenisLokasiSelect.value;
@@ -125,6 +127,48 @@ function initFormPesan() {
       window.open("https://wa.me/" + CONFIG.WHATSAPP + "?text=" + encodeURIComponent(pesan), "_blank");
     });
   }
+
+  // Upload template peta
+  var inputFile = document.getElementById("template-peta");
+  var uploadArea = document.getElementById("upload-area");
+  var uploadPreview = document.getElementById("upload-preview");
+  var previewName = document.getElementById("preview-name");
+  var uploadError = document.getElementById("upload-error");
+  var btnHapusFile = document.getElementById("btn-hapus-file");
+
+  if (inputFile) {
+    inputFile.addEventListener("change", function () {
+      uploadError.textContent = "";
+      var file = this.files[0];
+      if (!file) {
+        uploadPreview.style.display = "none";
+        return;
+      }
+      var allowed = ["image/jpeg", "image/png"];
+      if (!allowed.includes(file.type)) {
+        uploadError.textContent = "Format tidak didukung. Hanya JPG dan PNG.";
+        this.value = "";
+        uploadPreview.style.display = "none";
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        uploadError.textContent = "Ukuran file melebihi 5 MB.";
+        this.value = "";
+        uploadPreview.style.display = "none";
+        return;
+      }
+      previewName.textContent = file.name;
+      uploadPreview.style.display = "flex";
+    });
+  }
+
+  if (btnHapusFile) {
+    btnHapusFile.addEventListener("click", function () {
+      inputFile.value = "";
+      uploadPreview.style.display = "none";
+      uploadError.textContent = "";
+    });
+  }
 }
 
 function kirimPesanan() {
@@ -132,10 +176,24 @@ function kirimPesanan() {
   var statusEl = document.getElementById("status-pesan");
   var hasilEl = document.getElementById("hasil-pesan");
 
+  // Validasi file jika ada
+  var inputFile = document.getElementById("template-peta");
+  if (inputFile && inputFile.files[0]) {
+    var file = inputFile.files[0];
+    var allowed = ["image/jpeg", "image/png"];
+    if (!allowed.includes(file.type) || file.size > 5 * 1024 * 1024) {
+      document.getElementById("upload-error").textContent = "File tidak valid. Hanya JPG/PNG, maks 5 MB.";
+      return;
+    }
+  }
+
   btn.disabled = true;
   btn.textContent = "Mengirim...";
   statusEl.style.display = "none";
   hasilEl.style.display = "none";
+
+  var kontakEl = document.getElementById("kontak");
+  var pesanKhususEl = document.getElementById("pesan-khusus");
 
   var params = {
     action: "submitOrder",
@@ -145,27 +203,59 @@ function kirimPesanan() {
     programStudi: document.getElementById("program-studi").value,
     jenisPeta: document.getElementById("jenis-peta").value,
     jenisLokasi: document.getElementById("jenis-lokasi") ? document.getElementById("jenis-lokasi").value : "-",
-    detailLokasi: document.getElementById("detail-lokasi") ? document.getElementById("detail-lokasi").value : "-"
+    detailLokasi: document.getElementById("detail-lokasi") ? document.getElementById("detail-lokasi").value : "-",
+    kontak: kontakEl ? kontakEl.value : "-",
+    pesanKhusus: pesanKhususEl ? pesanKhususEl.value : "-"
   };
 
-  apiGet(params, function (err, data) {
-    btn.disabled = false;
-    btn.textContent = "Kirim Pesanan";
+  // Jika ada file template, kirim via FormData (POST multipart)
+  var fileObj = inputFile && inputFile.files[0] ? inputFile.files[0] : null;
 
-    if (err || !data || !data.success) {
-      statusEl.className = "alert alert-error";
-      statusEl.textContent = "Gagal mengirim pesanan. Coba lagi atau hubungi WhatsApp kami.";
-      statusEl.style.display = "block";
-      return;
-    }
+  if (fileObj) {
+    kirimDenganFile(params, fileObj, btn, statusEl, hasilEl);
+  } else {
+    apiGet(params, function (err, data) {
+      handleResponPesanan(err, data, btn, statusEl, hasilEl);
+    });
+  }
+}
 
-    hasilEl.querySelector(".order-id-display").textContent = data.orderId;
-    hasilEl.style.display = "block";
-    document.getElementById("form-pesan").reset();
-    document.getElementById("section-lokasi").style.display = "none";
-    document.getElementById("section-wa").style.display = "none";
-    window.scrollTo({ top: hasilEl.offsetTop - 80, behavior: "smooth" });
-  });
+function kirimDenganFile(params, file, btn, statusEl, hasilEl) {
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    var base64 = e.target.result.split(",")[1];
+    params.fileBase64 = base64;
+    params.fileName = file.name;
+    params.fileType = file.type;
+    apiGet(params, function (err, data) {
+      handleResponPesanan(err, data, btn, statusEl, hasilEl);
+    });
+  };
+  reader.onerror = function () {
+    handleResponPesanan("Gagal membaca file", null, btn, statusEl, hasilEl);
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleResponPesanan(err, data, btn, statusEl, hasilEl) {
+  btn.disabled = false;
+  btn.textContent = "Kirim Pesanan";
+
+  if (err || !data || !data.success) {
+    statusEl.className = "alert alert-error";
+    statusEl.textContent = "Gagal mengirim pesanan. Coba lagi atau hubungi WhatsApp kami.";
+    statusEl.style.display = "block";
+    return;
+  }
+
+  hasilEl.querySelector(".order-id-display").textContent = data.orderId;
+  hasilEl.style.display = "block";
+  document.getElementById("form-pesan").reset();
+  var uploadPreview = document.getElementById("upload-preview");
+  if (uploadPreview) uploadPreview.style.display = "none";
+  document.getElementById("section-lokasi").style.display = "none";
+  document.getElementById("section-wa").style.display = "none";
+  window.scrollTo({ top: hasilEl.offsetTop - 80, behavior: "smooth" });
 }
 
 function salinId(elId) {
@@ -230,6 +320,8 @@ function lacakById() {
           '<div class="order-row"><span>Jenis Peta</span><span>' + o.jenisPeta + '</span></div>' +
           (o.jenisLokasi && o.jenisLokasi !== "-" ? '<div class="order-row"><span>Jenis Lokasi</span><span>' + o.jenisLokasi + '</span></div>' : '') +
           (o.detailLokasi && o.detailLokasi !== "-" ? '<div class="order-row"><span>Detail Lokasi</span><span>' + o.detailLokasi + '</span></div>' : '') +
+          (o.kontak && o.kontak !== "-" ? '<div class="order-row"><span>Kontak</span><span>' + o.kontak + '</span></div>' : '') +
+          (o.pesanKhusus && o.pesanKhusus !== "-" ? '<div class="order-row catatan"><span>Pesan Khusus</span><span>' + o.pesanKhusus + '</span></div>' : '') +
           '<div class="order-row"><span>Tanggal Pesan</span><span>' + o.tanggalPesan + '</span></div>' +
           (o.catatanAdmin ? '<div class="order-row catatan"><span>Catatan</span><span>' + o.catatanAdmin + '</span></div>' : '') +
         '</div>' +
