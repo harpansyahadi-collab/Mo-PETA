@@ -3,8 +3,8 @@
 // ============================================================
 
 var CONFIG = {
-  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx_BBwJLfZjJO0VJrWrXVMquDoz6UHhiNfm_7_p1ju7Rn60XCs7RdchoUp9x-Lw8nqXFw/exec",
-  WHATSAPP: "6281275540985",   // ← Ganti dengan nomor WhatsApp
+  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxxyfhHPeWI-szre9zxK-OxTz-AYYBjHIS54c5tnFZwM8AoKbiwNBBcmzA31R9hJ1uOTw/exec",
+  WHATSAPP: "62895425966562",   // ← Ganti dengan nomor WhatsApp
   INSTAGRAM: "mopeta.official" // ← Ganti dengan username Instagram
 };
 
