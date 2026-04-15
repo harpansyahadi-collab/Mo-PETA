@@ -68,15 +68,16 @@ button { cursor: pointer; font-family: inherit; }
   letter-spacing: 0.5px;
 }
 .navbar-brand .brand-icon {
-  width: 47px;
-  height: 47px;
+  width: 36px;
+  height: 36px;
   background: var(--putih);
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.56rem;
+  font-size: 2rem;
   line-height: 1;
+  overflow: visible;
 }
 .navbar-nav {
   display: flex;
