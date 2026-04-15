@@ -68,14 +68,15 @@ button { cursor: pointer; font-family: inherit; }
   letter-spacing: 0.5px;
 }
 .navbar-brand .brand-icon {
-  width: 36px;
-  height: 36px;
+  width: 47px;
+  height: 47px;
   background: var(--putih);
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.56rem;
+  line-height: 1;
 }
 .navbar-nav {
   display: flex;
@@ -283,6 +284,7 @@ button { cursor: pointer; font-family: inherit; }
   box-shadow: 0 0 0 3px rgba(76,175,80,0.15);
 }
 select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23757575'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px; }
+textarea.form-control { resize: vertical; min-height: 100px; }
 .hidden { display: none !important; }
 .btn-primary {
   display: inline-block;
@@ -323,6 +325,53 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
   color: #166534;
   margin-bottom: 16px;
 }
+
+/* ---- Upload Template ---- */
+.upload-area {
+  border: 2px dashed var(--abu);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  position: relative;
+  background: var(--abu-muda);
+}
+.upload-area:hover { border-color: var(--hijau-muda); background: var(--hijau-bg); }
+.upload-area input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+.upload-icon { font-size: 2rem; margin-bottom: 8px; }
+.upload-text { font-size: 0.9rem; color: var(--teks-abu); }
+.upload-text strong { color: var(--hijau); }
+.upload-preview {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--hijau-bg);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  color: var(--hijau-tua);
+}
+.upload-preview .preview-name { flex: 1; word-break: break-all; font-weight: 600; }
+.upload-preview .btn-hapus-file {
+  background: none;
+  border: none;
+  color: var(--merah);
+  font-size: 1.1rem;
+  padding: 0 4px;
+  cursor: pointer;
+  line-height: 1;
+}
+.upload-note { font-size: 0.8rem; color: var(--teks-abu); margin-top: 6px; }
+.upload-error { font-size: 0.82rem; color: var(--merah); margin-top: 4px; }
 
 
 /* ---- Alert ---- */
