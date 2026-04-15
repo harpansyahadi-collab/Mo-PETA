@@ -68,8 +68,8 @@ button { cursor: pointer; font-family: inherit; }
   letter-spacing: 0.5px;
 }
 .navbar-brand .brand-icon {
-  width: 40px;
-  height: 40px;
+  width: 6%;
+  height: 6%;
   display: flex;
   align-items: center;
   justify-content: center;
