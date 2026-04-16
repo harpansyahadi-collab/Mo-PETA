@@ -100,8 +100,14 @@
               </select>
             </div>
 
-            <!-- [Kondisional] Peta Lokasi Penelitian -->
+            <!-- ============================================================ -->
+            <!-- [Kondisional] Peta Lokasi Penelitian                         -->
+            <!-- Berisi: jenis lokasi, detail lokasi, upload template,        -->
+            <!--         pesan khusus, tombol kirim                           -->
+            <!-- ============================================================ -->
             <div id="section-lokasi" style="display:none">
+
+              <!-- Jenis Lokasi -->
               <div class="form-group">
                 <label for="jenis-lokasi">Jenis Lokasi <span class="wajib">*</span></label>
                 <select id="jenis-lokasi" name="jenisLokasi" class="form-control">
@@ -110,14 +116,52 @@
                   <option value="Nama Tempat (Institusi/Lembaga)">Nama Tempat (Institusi / Lembaga)</option>
                 </select>
               </div>
+
+              <!-- Detail Lokasi -->
               <div id="section-detail-lokasi" class="form-group" style="display:none">
                 <label for="detail-lokasi" id="label-detail">Detail Lokasi <span class="wajib">*</span></label>
                 <input type="text" id="detail-lokasi" name="detailLokasi" class="form-control"
                   placeholder="" />
               </div>
-            </div>
 
-            <!-- [Kondisional] Peta Titik Pengambilan Sampel → WA -->
+              <!-- Upload Template Peta (opsional) -->
+              <div class="form-group">
+                <label>Template Susunan Peta <span style="color:var(--teks-abu);font-weight:400">(opsional)</span></label>
+                <div class="upload-area" id="upload-area">
+                  <input type="file" id="template-peta" name="templatePeta" accept=".jpg,.jpeg,.png" />
+                  <div class="upload-icon">🖼️</div>
+                  <div class="upload-text">
+                    <strong>Klik untuk pilih file</strong> atau seret ke sini<br>
+                    JPG / PNG, maksimal 5 MB
+                  </div>
+                </div>
+                <div class="upload-preview" id="upload-preview" style="display:none">
+                  <span>📎</span>
+                  <span class="preview-name" id="preview-name"></span>
+                  <button type="button" class="btn-hapus-file" id="btn-hapus-file" title="Hapus file">✕</button>
+                </div>
+                <div class="upload-note">Unggah contoh template atau sketsa susunan peta yang Anda inginkan (tidak wajib).</div>
+                <div class="upload-error" id="upload-error"></div>
+              </div>
+
+              <!-- Pesan Khusus -->
+              <div class="form-group">
+                <label for="pesan-khusus">Pesan Khusus <span style="color:var(--teks-abu);font-weight:400">(opsional)</span></label>
+                <textarea id="pesan-khusus" name="pesanKhusus" class="form-control"
+                  placeholder="Tuliskan permintaan atau informasi tambahan yang perlu kami ketahui..."></textarea>
+              </div>
+
+              <!-- Tombol Kirim -->
+              <div id="section-submit" class="form-group" style="margin-top:28px">
+                <button type="submit" id="btn-kirim" class="btn-primary">Kirim Pesanan</button>
+              </div>
+
+            </div>
+            <!-- /section-lokasi -->
+
+            <!-- ============================================================ -->
+            <!-- [Kondisional] Peta Titik Pengambilan Sampel → hanya WA       -->
+            <!-- ============================================================ -->
             <div id="section-wa" style="display:none">
               <div class="wa-info">
                 Pemesanan <strong>Peta Titik Pengambilan Sampel</strong> dilakukan melalui WhatsApp agar kami bisa berkoordinasi langsung mengenai data koordinat titik sampel Anda.
@@ -127,38 +171,7 @@
                 Hubungi via WhatsApp
               </button>
             </div>
-
-            <!-- Upload Template Peta (opsional) -->
-            <div class="form-group">
-              <label>Template Susunan Peta <span style="color:var(--teks-abu);font-weight:400">(opsional)</span></label>
-              <div class="upload-area" id="upload-area">
-                <input type="file" id="template-peta" name="templatePeta" accept=".jpg,.jpeg,.png" />
-                <div class="upload-icon">🖼️</div>
-                <div class="upload-text">
-                  <strong>Klik untuk pilih file</strong> atau seret ke sini<br>
-                  JPG / PNG, maksimal 5 MB
-                </div>
-              </div>
-              <div class="upload-preview" id="upload-preview" style="display:none">
-                <span>📎</span>
-                <span class="preview-name" id="preview-name"></span>
-                <button type="button" class="btn-hapus-file" id="btn-hapus-file" title="Hapus file">✕</button>
-              </div>
-              <div class="upload-note">Unggah contoh template atau sketsa susunan peta yang Anda inginkan (tidak wajib).</div>
-              <div class="upload-error" id="upload-error"></div>
-            </div>
-
-            <!-- Pesan Khusus -->
-            <div class="form-group">
-              <label for="pesan-khusus">Pesan Khusus <span style="color:var(--teks-abu);font-weight:400">(opsional)</span></label>
-              <textarea id="pesan-khusus" name="pesanKhusus" class="form-control"
-                placeholder="Tuliskan permintaan atau informasi tambahan yang perlu kami ketahui..."></textarea>
-            </div>
-
-            <!-- Tombol Kirim (hanya muncul jika bukan jenis sampel) -->
-            <div id="section-submit" class="form-group" style="margin-top:28px">
-              <button type="submit" id="btn-kirim" class="btn-primary">Kirim Pesanan</button>
-            </div>
+            <!-- /section-wa -->
 
           </form>
         </div>
@@ -189,15 +202,6 @@
   <script>
     function initPage() {
       initFormPesan();
-
-      document.getElementById("jenis-peta").addEventListener("change", function () {
-        var submitSection = document.getElementById("section-submit");
-        if (this.value === "Peta Titik Pengambilan Sampel") {
-          submitSection.style.display = "none";
-        } else {
-          submitSection.style.display = "block";
-        }
-      });
     }
   </script>
 </body>
