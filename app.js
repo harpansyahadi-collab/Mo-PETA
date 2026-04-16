@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 // ============================================================
-// Utilitas: Panggil API via GET (JSONP) — untuk aksi tanpa file
+// Utilitas: Panggil API (semua pakai GET)
 // ============================================================
 function apiGet(params, callback) {
   var url = CONFIG.SCRIPT_URL + "?" + objToQuery(params);
@@ -58,43 +58,6 @@ function apiGet(params, callback) {
 
   script.src = url;
   document.body.appendChild(script);
-}
-
-// ============================================================
-// Utilitas: Panggil API via POST (fetch) — untuk aksi dengan file
-// ============================================================
-function apiPost(params, callback) {
-  // Google Apps Script doPost menerima application/x-www-form-urlencoded
-  // melalui fetch dengan no-cors (karena GAS tidak kirim CORS header pada doPost).
-  // Strategi: kirim sebagai GET ke doPost dengan query string,
-  // lalu baca respons via fetch biasa ke URL yang sudah di-deploy sebagai Web App.
-  //
-  // CATATAN: Google Apps Script Web App yang di-deploy "Execute as: Me"
-  // dan "Who has access: Anyone" mendukung fetch POST tanpa kredensial.
-  // Responsnya bisa dibaca selama Content-Type JSON dikembalikan.
-
-  fetch(CONFIG.SCRIPT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: objToQuery(params)
-  })
-    .then(function (res) {
-      // GAS kadang redirect — ikuti redirect secara otomatis (default fetch)
-      return res.text();
-    })
-    .then(function (text) {
-      try {
-        var data = JSON.parse(text);
-        callback(null, data);
-      } catch (e) {
-        callback("Respons server tidak valid: " + text.substring(0, 100));
-      }
-    })
-    .catch(function (err) {
-      callback("Gagal terhubung ke server: " + err.message);
-    });
 }
 
 function objToQuery(obj) {
@@ -167,6 +130,7 @@ function initFormPesan() {
 
   // Upload template peta
   var inputFile = document.getElementById("template-peta");
+  var uploadArea = document.getElementById("upload-area");
   var uploadPreview = document.getElementById("upload-preview");
   var previewName = document.getElementById("preview-name");
   var uploadError = document.getElementById("upload-error");
@@ -244,41 +208,32 @@ function kirimPesanan() {
     pesanKhusus: pesanKhususEl ? pesanKhususEl.value : "-"
   };
 
-  // Jika ada file template, baca sebagai Base64 lalu kirim via POST
+  // Jika ada file template, kirim via FormData (POST multipart)
   var fileObj = inputFile && inputFile.files[0] ? inputFile.files[0] : null;
 
   if (fileObj) {
-    // FIX: Gunakan FileReader async dengan benar, lalu kirim POST (bukan GET)
     kirimDenganFile(params, fileObj, btn, statusEl, hasilEl);
   } else {
-    // Tanpa file: tetap gunakan JSONP GET seperti semula
     apiGet(params, function (err, data) {
       handleResponPesanan(err, data, btn, statusEl, hasilEl);
     });
   }
 }
 
-// FIX: Fungsi ini sekarang menggunakan fetch POST agar Base64 tidak masuk URL
 function kirimDenganFile(params, file, btn, statusEl, hasilEl) {
   var reader = new FileReader();
-
   reader.onload = function (e) {
-    // Ambil hanya bagian data (tanpa prefix "data:image/png;base64,")
     var base64 = e.target.result.split(",")[1];
     params.fileBase64 = base64;
-    params.fileName   = file.name;
-    params.fileType   = file.type;
-
-    // FIX: Kirim via POST — bukan apiGet (JSONP/GET) yang terbatas panjang URL
-    apiPost(params, function (err, data) {
+    params.fileName = file.name;
+    params.fileType = file.type;
+    apiGet(params, function (err, data) {
       handleResponPesanan(err, data, btn, statusEl, hasilEl);
     });
   };
-
   reader.onerror = function () {
     handleResponPesanan("Gagal membaca file", null, btn, statusEl, hasilEl);
   };
-
   reader.readAsDataURL(file);
 }
 
@@ -359,16 +314,10 @@ function lacakById() {
           '<span class="badge ' + statusClass + '">' + o.status + '</span>' +
         '</div>' +
         '<div class="order-card-body">' +
-          '<div class="order-row"><span>Nama</span><span>' + o.nama + '</span></div>' +
-          '<div class="order-row"><span>NIM</span><span>' + o.nim + '</span></div>' +
-          '<div class="order-row"><span>Program Studi</span><span>' + o.programStudi + '</span></div>' +
-          '<div class="order-row"><span>Jenis Peta</span><span>' + o.jenisPeta + '</span></div>' +
+          '<div class="order-row"><span>Nama</span><span>' + maskName(o.nama) + '</span></div>' +
           (o.jenisLokasi && o.jenisLokasi !== "-" ? '<div class="order-row"><span>Jenis Lokasi</span><span>' + o.jenisLokasi + '</span></div>' : '') +
           (o.detailLokasi && o.detailLokasi !== "-" ? '<div class="order-row"><span>Detail Lokasi</span><span>' + o.detailLokasi + '</span></div>' : '') +
-          (o.kontak && o.kontak !== "-" ? '<div class="order-row"><span>Kontak</span><span>' + o.kontak + '</span></div>' : '') +
-          (o.pesanKhusus && o.pesanKhusus !== "-" ? '<div class="order-row catatan"><span>Pesan Khusus</span><span>' + o.pesanKhusus + '</span></div>' : '') +
           '<div class="order-row"><span>Tanggal Pesan</span><span>' + o.tanggalPesan + '</span></div>' +
-          (o.catatanAdmin ? '<div class="order-row catatan"><span>Catatan</span><span>' + o.catatanAdmin + '</span></div>' : '') +
         '</div>' +
       '</div>';
   });
@@ -439,4 +388,12 @@ function getStatusClass(status) {
     "Dibatalkan": "badge-merah"
   };
   return map[status] || "badge-abu";
+}
+
+function maskName(name) {
+  if (!name || name === "-") return name;
+  return name.split(" ").map(function(w) {
+    if (w.length <= 2) return w.charAt(0) + "*";
+    return w.substring(0, 2) + "*".repeat(w.length - 2);
+  }).join(" ");
 }
