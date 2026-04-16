@@ -66,6 +66,17 @@ function objToQuery(obj) {
   }).join("&");
 }
 
+function apiPost(params, callback) {
+  fetch(CONFIG.SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: objToQuery(params)
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) { callback(null, data); })
+  .catch(function(err) { callback(err.message || "Gagal terhubung"); });
+}
+
 
 // ============================================================
 // HALAMAN PESAN
@@ -227,7 +238,7 @@ function kirimDenganFile(params, file, btn, statusEl, hasilEl) {
     params.fileBase64 = base64;
     params.fileName = file.name;
     params.fileType = file.type;
-    apiGet(params, function (err, data) {
+    apiPost(params, function (err, data) {
       handleResponPesanan(err, data, btn, statusEl, hasilEl);
     });
   };
