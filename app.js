@@ -115,10 +115,10 @@ function initFormPesan() {
     var jl = jenisLokasiSelect.value;
     if (jl === "Wilayah") {
       labelDetail.textContent = "Nama Wilayah";
-      document.getElementById("detail-lokasi").placeholder = "Contoh: Kecamatan Bogor Utara, Kota Bogor";
+      document.getElementById("detail-lokasi").placeholder = "Contoh: Kecamatan Pandan, Kab. Tapanuli Tengah";
     } else if (jl === "Nama Tempat (Institusi/Lembaga)") {
       labelDetail.textContent = "Nama Institusi / Lembaga";
-      document.getElementById("detail-lokasi").placeholder = "Contoh: IPB University, Bogor";
+      document.getElementById("detail-lokasi").placeholder = "Contoh: Pasar Balam, Sibolga";
     } else {
       labelDetail.textContent = "Detail Lokasi";
       document.getElementById("detail-lokasi").placeholder = "";
