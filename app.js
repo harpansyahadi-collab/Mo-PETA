@@ -87,7 +87,7 @@ function initFormPesan() {
 
   var jenisPetaSelect = document.getElementById("jenis-peta");
   var sectionLokasi = document.getElementById("section-lokasi");
-  var sectionWa = document.getElementById("section-wa");
+  var sectionKoordinat = document.getElementById("section-koordinat");
   var jenisLokasiSelect = document.getElementById("jenis-lokasi");
   var sectionDetailLokasi = document.getElementById("section-detail-lokasi");
   var labelDetail = document.getElementById("label-detail");
@@ -96,14 +96,14 @@ function initFormPesan() {
     var val = this.value;
     if (val === "Peta Lokasi Penelitian") {
       sectionLokasi.style.display = "block";
-      sectionWa.style.display = "none";
+      if (sectionKoordinat) sectionKoordinat.style.display = "none";
       updateDetailLabel();
     } else if (val === "Peta Titik Pengambilan Sampel") {
       sectionLokasi.style.display = "none";
-      sectionWa.style.display = "block";
+      if (sectionKoordinat) sectionKoordinat.style.display = "block";
     } else {
       sectionLokasi.style.display = "none";
-      sectionWa.style.display = "none";
+      if (sectionKoordinat) sectionKoordinat.style.display = "none";
     }
   });
 
@@ -131,47 +131,42 @@ function initFormPesan() {
     kirimPesanan();
   });
 
-  var btnWa = document.getElementById("btn-wa-sampel");
-  if (btnWa) {
-    btnWa.addEventListener("click", function () {
-      var pesan = "Halo Mo-PETA! Saya ingin memesan Peta Titik Pengambilan Sampel.";
-      window.open("https://wa.me/" + CONFIG.WHATSAPP + "?text=" + encodeURIComponent(pesan), "_blank");
-    });
-  }
-
   // Upload template peta
-  var inputFile = document.getElementById("template-peta");
-  var uploadArea = document.getElementById("upload-area");
-  var uploadPreview = document.getElementById("upload-preview");
-  var previewName = document.getElementById("preview-name");
-  var uploadError = document.getElementById("upload-error");
-  var btnHapusFile = document.getElementById("btn-hapus-file");
+  setupFileInput("template-peta", "upload-preview", "preview-name", "upload-error", "btn-hapus-file", ["image/jpeg", "image/png"], 5 * 1024 * 1024);
+  // Upload file koordinat
+  setupFileInput("file-koordinat", "upload-preview-koordinat", "preview-name-koordinat", "upload-error-koordinat", "btn-hapus-file-koordinat", null, 1 * 1024 * 1024);
+}
 
-  if (inputFile) {
-    inputFile.addEventListener("change", function () {
-      uploadError.textContent = "";
-      var file = this.files[0];
-      if (!file) {
-        uploadPreview.style.display = "none";
-        return;
-      }
-      var allowed = ["image/jpeg", "image/png"];
-      if (!allowed.includes(file.type)) {
-        uploadError.textContent = "Format tidak didukung. Hanya JPG dan PNG.";
-        this.value = "";
-        uploadPreview.style.display = "none";
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        uploadError.textContent = "Ukuran file melebihi 5 MB.";
-        this.value = "";
-        uploadPreview.style.display = "none";
-        return;
-      }
-      previewName.textContent = file.name;
-      uploadPreview.style.display = "flex";
-    });
-  }
+function setupFileInput(inputId, previewId, nameId, errorId, btnHapusId, allowedTypes, maxSize) {
+  var inputFile = document.getElementById(inputId);
+  if (!inputFile) return;
+  var uploadPreview = document.getElementById(previewId);
+  var previewName = document.getElementById(nameId);
+  var uploadError = document.getElementById(errorId);
+  var btnHapusFile = document.getElementById(btnHapusId);
+
+  inputFile.addEventListener("change", function () {
+    uploadError.textContent = "";
+    var file = this.files[0];
+    if (!file) {
+      uploadPreview.style.display = "none";
+      return;
+    }
+    if (allowedTypes && !allowedTypes.includes(file.type)) {
+      uploadError.textContent = "Format gambar tidak didukung.";
+      this.value = "";
+      uploadPreview.style.display = "none";
+      return;
+    }
+    if (file.size > maxSize) {
+      uploadError.textContent = "Ukuran file melebihi batas " + (maxSize / 1024 / 1024) + " MB.";
+      this.value = "";
+      uploadPreview.style.display = "none";
+      return;
+    }
+    previewName.textContent = file.name;
+    uploadPreview.style.display = "flex";
+  });
 
   if (btnHapusFile) {
     btnHapusFile.addEventListener("click", function () {
@@ -182,18 +177,38 @@ function initFormPesan() {
   }
 }
 
+function readAsBase64(file) {
+  return new Promise(function(resolve, reject) {
+    if (!file) return resolve(null);
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      resolve({
+        base64: e.target.result.split(",")[1],
+        name: file.name,
+        type: file.type || "application/octet-stream"
+      });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 function kirimPesanan() {
   var btn = document.getElementById("btn-kirim");
   var statusEl = document.getElementById("status-pesan");
   var hasilEl = document.getElementById("hasil-pesan");
 
-  // Validasi file jika ada
-  var inputFile = document.getElementById("template-peta");
-  if (inputFile && inputFile.files[0]) {
-    var file = inputFile.files[0];
-    var allowed = ["image/jpeg", "image/png"];
-    if (!allowed.includes(file.type) || file.size > 5 * 1024 * 1024) {
-      document.getElementById("upload-error").textContent = "File tidak valid. Hanya JPG/PNG, maks 5 MB.";
+  // Validasi form manual sebelum disable button
+  var inputTemplate = document.getElementById("template-peta");
+  var fileTemplateObj = inputTemplate && inputTemplate.files[0] ? inputTemplate.files[0] : null;
+
+  var inputKoordinat = document.getElementById("file-koordinat");
+  var fileKoordinatObj = inputKoordinat && inputKoordinat.files[0] ? inputKoordinat.files[0] : null;
+  
+  if (document.getElementById("jenis-peta").value === "Peta Titik Pengambilan Sampel") {
+    if (!fileKoordinatObj) {
+      var errKoor = document.getElementById("upload-error-koordinat");
+      if (errKoor) errKoor.textContent = "File Koordinat wajib diisi.";
       return;
     }
   }
@@ -219,33 +234,30 @@ function kirimPesanan() {
     pesanKhusus: pesanKhususEl ? pesanKhususEl.value : "-"
   };
 
-  // Jika ada file template, kirim via FormData (POST multipart)
-  var fileObj = inputFile && inputFile.files[0] ? inputFile.files[0] : null;
+  Promise.all([
+    readAsBase64(fileTemplateObj),
+    readAsBase64(fileKoordinatObj)
+  ]).then(function(results) {
+    var resTemplate = results[0];
+    var resKoordinat = results[1];
 
-  if (fileObj) {
-    kirimDenganFile(params, fileObj, btn, statusEl, hasilEl);
-  } else {
-    apiGet(params, function (err, data) {
-      handleResponPesanan(err, data, btn, statusEl, hasilEl);
-    });
-  }
-}
+    if (resTemplate) {
+      params.fileBase64 = resTemplate.base64;
+      params.fileName = resTemplate.name;
+      params.fileType = resTemplate.type;
+    }
+    if (resKoordinat) {
+      params.koordinatBase64 = resKoordinat.base64;
+      params.koordinatName = resKoordinat.name;
+      params.koordinatType = resKoordinat.type;
+    }
 
-function kirimDenganFile(params, file, btn, statusEl, hasilEl) {
-  var reader = new FileReader();
-  reader.onload = function (e) {
-    var base64 = e.target.result.split(",")[1];
-    params.fileBase64 = base64;
-    params.fileName = file.name;
-    params.fileType = file.type;
     apiPost(params, function (err, data) {
       handleResponPesanan(err, data, btn, statusEl, hasilEl);
     });
-  };
-  reader.onerror = function () {
+  }).catch(function() {
     handleResponPesanan("Gagal membaca file", null, btn, statusEl, hasilEl);
-  };
-  reader.readAsDataURL(file);
+  });
 }
 
 function handleResponPesanan(err, data, btn, statusEl, hasilEl) {
@@ -264,8 +276,12 @@ function handleResponPesanan(err, data, btn, statusEl, hasilEl) {
   document.getElementById("form-pesan").reset();
   var uploadPreview = document.getElementById("upload-preview");
   if (uploadPreview) uploadPreview.style.display = "none";
-  document.getElementById("section-lokasi").style.display = "none";
-  document.getElementById("section-wa").style.display = "none";
+  var uploadPreviewKoor = document.getElementById("upload-preview-koordinat");
+  if (uploadPreviewKoor) uploadPreviewKoor.style.display = "none";
+  var sectLokasi = document.getElementById("section-lokasi");
+  if (sectLokasi) sectLokasi.style.display = "none";
+  var sectKoor = document.getElementById("section-koordinat");
+  if (sectKoor) sectKoor.style.display = "none";
   window.scrollTo({ top: hasilEl.offsetTop - 80, behavior: "smooth" });
 }
 
