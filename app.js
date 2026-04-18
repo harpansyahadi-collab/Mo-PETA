@@ -1,6 +1,6 @@
-// ============================================================
+// ===========================================================
 // Mo-PETA — Konfigurasi & Fungsi Utama
-// ============================================================
+// ===========================================================
 
 var CONFIG = {
   SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxxyfhHPeWI-szre9zxK-OxTz-AYYBjHIS54c5tnFZwM8AoKbiwNBBcmzA31R9hJ1uOTw/exec",
